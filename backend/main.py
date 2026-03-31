@@ -13,6 +13,9 @@ app.add_middleware(
 )
 
 # Connect to SQLite DB
+import os
+
+os.makedirs("data", exist_ok=True)
 conn = sqlite3.connect("data/data.db", check_same_thread=False)
 
 

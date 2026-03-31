@@ -5,7 +5,7 @@ async function uploadCSV() {
     let formData = new FormData();
     formData.append("file", file);
 
-    let response = await fetch("http://127.0.0.1:8000/upload", {
+    let response = await fetch("https://sheetql-backend.onrender.com/upload", {
         method: "POST",
         body: formData
     });
@@ -21,7 +21,7 @@ async function uploadCSV() {
 async function runQuery() {
     const query = document.getElementById("query").value;
 
-    let response = await fetch("http://127.0.0.1:8000/query", {
+    let response = await fetch("https://sheetql-backend.onrender.com/query", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -37,7 +37,7 @@ async function runQuery() {
 
 // 🔥 NEW FUNCTION
 async function loadTables() {
-    let response = await fetch("http://127.0.0.1:8000/tables");
+    let response = await fetch("https://sheetql-backend.onrender.com/tables");
     let data = await response.json();
 
     let grouped = {};

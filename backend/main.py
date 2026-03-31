@@ -26,8 +26,6 @@ async def upload_csv(file: UploadFile = File(...)):
     df.to_sql("data", conn, if_exists="replace", index=False)
 
     return {"message": "CSV uploaded and table created"}
-
-
 @app.post("/query")
 async def run_query(query: str):
     if not query.lower().strip().startswith("select"):

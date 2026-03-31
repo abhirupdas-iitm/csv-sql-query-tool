@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>CSV → SQL Tool</title>
+</head>
+
+<body>
+
+    <h1>CSV → SQL Tool</h1>
+
+    <h3>Upload CSV</h3>
+    <input type="file" id="fileInput">
+    <button onclick="uploadCSV()">Upload</button>
+
+    <h3>Run SQL Query</h3>
+    <textarea id="query" rows="5" cols="50">
+SELECT * FROM data;
+    </textarea><br>
+    <button onclick="runQuery()">Run Query</button>
+
+    <h3>Results</h3>
+    <div id="result"></div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

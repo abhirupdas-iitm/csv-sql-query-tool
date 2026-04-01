@@ -99,3 +99,14 @@ button:hover {
     background: var(--accent-blue);
     color: black;
 }
+
+.sheet {
+    color: var(--accent-green);
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.tables {
+    margin-left: 15px;
+    color: white;
+}

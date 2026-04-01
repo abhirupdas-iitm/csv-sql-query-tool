@@ -143,3 +143,60 @@ button:hover {
 .tables div:hover {
     color: var(--accent-blue);
 }
+
+/* 🔝 CENTERED UPLOAD BAR */
+.top-upload {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+/* 🧠 MAIN GRID */
+.main-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    height: calc(100vh - 180px);
+}
+
+/* 📁 LEFT PANEL */
+.sheet-panel {
+    background: black;
+    border-right: 2px solid white;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+/* 📁 SHEET GRID (IMPORTANT CHANGE) */
+.sheet-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* 📁 INDIVIDUAL SHEET BLOCK */
+.sheet {
+    background: #111;
+    padding: 10px;
+    border: 1px solid white;
+    min-width: 120px;
+}
+
+/* ⚡ RIGHT SIDE */
+.workspace-grid {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+}
+
+/* 🖥 PANELS */
+.panel {
+    background: black;
+    border-bottom: 2px solid white;
+    padding: 15px;
+    overflow: auto;
+}
+
+.sheet-container {
+    display: flex;
+    flex-wrap: wrap;
+}

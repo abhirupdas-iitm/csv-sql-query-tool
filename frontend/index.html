@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>SheetQL 🔥</title>
+    <title>SheetQL 🚀</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -24,31 +24,33 @@
         <h1>SheetQL 🚀</h1>
     </div>
 
-    <!-- 📂 UPLOAD -->
-    <div class="upload">
+    <!-- 📂 TOP UPLOAD BAR (CENTERED) -->
+    <div class="top-upload">
         <input type="file" id="fileInput">
-        <button onclick="uploadCSV()">Upload</button>
+        <button onclick="uploadCSV()">Upload File</button>
     </div>
 
-    <!-- 🧠 MAIN GRID -->
-    <div class="main">
+    <!-- 🧠 MAIN CONTENT -->
+    <div class="main-grid">
 
-        <!-- LEFT PANEL -->
-        <div class="sidebar">
+        <!-- 📁 LEFT: SHEETS -->
+        <div class="sheet-panel">
             <h3>Tables</h3>
-            <div id="tables"></div>
+            <div id="tables" class="sheet-container"></div>
         </div>
 
-        <!-- RIGHT PANEL -->
-        <div class="workspace">
+        <!-- ⚡ RIGHT: WORKSPACE -->
+        <div class="workspace-grid">
 
-            <div class="query-box">
+            <!-- 🖥 QUERY PANEL -->
+            <div class="panel">
                 <h3>SQL Query</h3>
                 <textarea id="query">SELECT * FROM default__data;</textarea>
                 <button onclick="runQuery()">Run</button>
             </div>
 
-            <div class="results-box">
+            <!-- 📊 RESULTS PANEL -->
+            <div class="panel">
                 <h3>Results</h3>
                 <div id="result"></div>
             </div>

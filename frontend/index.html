@@ -3,41 +3,59 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>CSV → SQL Tool</title>
+    <title>SheetQL 🔥</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <h3>Auth</h3>
+    <!-- 🔐 AUTH BAR -->
+    <div class="auth-bar">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="signup()">Sign Up</button>
+        <button onclick="login()">Login</button>
+        <button onclick="logout()">Logout</button>
+        <span id="authStatus">Not logged in</span>
+    </div>
 
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
+    <!-- 🔝 HEADER -->
+    <div class="header">
+        <h1>SheetQL 🚀</h1>
+    </div>
 
-    <button onclick="signup()">Sign Up</button>
-    <button onclick="login()">Login</button>
-    <button onclick="logout()">Logout</button>
+    <!-- 📂 UPLOAD -->
+    <div class="upload">
+        <input type="file" id="fileInput">
+        <button onclick="uploadCSV()">Upload</button>
+    </div>
 
-    <p id="authStatus">Not logged in</p>
+    <!-- 🧠 MAIN GRID -->
+    <div class="main">
 
-    <hr>
+        <!-- LEFT PANEL -->
+        <div class="sidebar">
+            <h3>Tables</h3>
+            <div id="tables"></div>
+        </div>
 
-    <h1>CSV → SQL Tool</h1>
+        <!-- RIGHT PANEL -->
+        <div class="workspace">
 
-    <h3>Upload CSV</h3>
-    <input type="file" id="fileInput">
-    <button onclick="uploadCSV()">Upload</button>
+            <div class="query-box">
+                <h3>SQL Query</h3>
+                <textarea id="query">SELECT * FROM default__data;</textarea>
+                <button onclick="runQuery()">Run</button>
+            </div>
 
-    <h3>Tables</h3>
-    <div id="tables"></div>
+            <div class="results-box">
+                <h3>Results</h3>
+                <div id="result"></div>
+            </div>
 
-    <h3>Run SQL Query</h3>
-    <textarea id="query" rows="5" cols="50">
-SELECT * FROM default__data;
-</textarea><br>
-    <button onclick="runQuery()">Run Query</button>
+        </div>
 
-    <h3>Results</h3>
-    <div id="result"></div>
+    </div>
 
     <script src="script.js"></script>
     <script type="module" src="auth.js"></script>

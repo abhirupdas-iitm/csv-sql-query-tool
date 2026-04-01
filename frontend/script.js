@@ -1,11 +1,28 @@
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const BASE_URL = "https://sheetql-backend.onrender.com";
+
+function getUser() {
+    const auth = getAuth();
+    return auth.currentUser;
+}
+
+
+// 🔥 UPLOAD
 async function uploadCSV() {
-    const fileInput = document.getElementById("fileInput");
-    const file = fileInput.files[0];
+    const file = document.getElementById("fileInput").files[0];
+    const user = getUser();
+
+    if (!user) {
+        alert("Login first!");
+        return;
+    }
 
     let formData = new FormData();
     formData.append("file", file);
+    formData.append("user_id", user.uid);
 
-    let response = await fetch("https://sheetql-backend.onrender.com/upload", {
+    let response = await fetch(`${BASE_URL}/upload`, {
         method: "POST",
         body: formData
     });
@@ -13,31 +30,53 @@ async function uploadCSV() {
     let data = await response.json();
     alert(JSON.stringify(data));
 
-    // 🔥 NEW LINE
     loadTables();
 }
 
 
+// 🔥 QUERY
 async function runQuery() {
+    const user = getUser();
+
+    if (!user) {
+        alert("Login first!");
+        return;
+    }
+
     const query = document.getElementById("query").value;
 
-    let response = await fetch("https://sheetql-backend.onrender.com/query", {
+    let response = await fetch(`${BASE_URL}/query`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ query: query })
+        body: JSON.stringify({
+            query: query,
+            user_id: user.uid
+        })
     });
 
     let data = await response.json();
-
     displayResult(data);
 }
 
 
-// 🔥 NEW FUNCTION
+// 🔥 LOAD TABLES
 async function loadTables() {
-    let response = await fetch("https://sheetql-backend.onrender.com/tables");
+    const user = getUser();
+
+    if (!user) return;
+
+    let response = await fetch(`${BASE_URL}/tables`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            user_id: user.uid
+        })
+    });
+
     let data = await response.json();
 
     let grouped = {};
@@ -56,10 +95,9 @@ async function loadTables() {
 }
 
 
-// 🔥 NEW FUNCTION
+// 🔥 DISPLAY TABLES
 function displayTables(grouped) {
     let container = document.getElementById("tables");
-
     container.innerHTML = "";
 
     for (let sheet in grouped) {
@@ -88,6 +126,7 @@ function displayTables(grouped) {
 }
 
 
+// 🔥 DISPLAY RESULT
 function displayResult(data) {
     let resultDiv = document.getElementById("result");
 

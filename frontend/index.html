@@ -1,20 +1,33 @@
 <!DOCTYPE html>
-<meta charset="UTF-8">
 <html>
 
 <head>
+    <meta charset="UTF-8">
     <title>CSV → SQL Tool</title>
 </head>
 
 <body>
 
+    <!-- 🔥 AUTH SECTION -->
+    <h3>Auth</h3>
+
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+
+    <button onclick="signup()">Sign Up</button>
+    <button onclick="login()">Login</button>
+    <button onclick="logout()">Logout</button>
+
+    <p id="authStatus">Not logged in</p>
+
+
+    <!-- 🔥 MAIN APP -->
     <h1>CSV → SQL Tool</h1>
 
     <h3>Upload CSV</h3>
     <input type="file" id="fileInput">
     <button onclick="uploadCSV()">Upload</button>
 
-    <!-- 🔥 NEW SECTION -->
     <h3>Tables</h3>
     <div id="tables"></div>
 
@@ -22,12 +35,15 @@
     <textarea id="query" rows="5" cols="50">
 SELECT * FROM data;
     </textarea><br>
+
     <button onclick="runQuery()">Run Query</button>
 
     <h3>Results</h3>
     <div id="result"></div>
 
+    <!-- 🔥 SCRIPTS -->
     <script src="script.js"></script>
+    <script type="module" src="auth.js"></script>
 
 </body>
 

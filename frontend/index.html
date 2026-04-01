@@ -8,7 +8,6 @@
 
 <body>
 
-    <!-- 🔥 AUTH SECTION -->
     <h3>Auth</h3>
 
     <input type="email" id="email" placeholder="Email">
@@ -20,8 +19,8 @@
 
     <p id="authStatus">Not logged in</p>
 
+    <hr>
 
-    <!-- 🔥 MAIN APP -->
     <h1>CSV → SQL Tool</h1>
 
     <h3>Upload CSV</h3>
@@ -33,15 +32,13 @@
 
     <h3>Run SQL Query</h3>
     <textarea id="query" rows="5" cols="50">
-SELECT * FROM data;
-    </textarea><br>
-
+SELECT * FROM default__data;
+</textarea><br>
     <button onclick="runQuery()">Run Query</button>
 
     <h3>Results</h3>
     <div id="result"></div>
 
-    <!-- 🔥 SCRIPTS -->
     <script src="script.js"></script>
     <script type="module" src="auth.js"></script>
 

@@ -1,157 +1,157 @@
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
 const BASE_URL = "https://sheetql-backend.onrender.com";
-
-function getUser() {
-    const auth = getAuth();
-    return auth.currentUser;
-}
-
 
 // 🔥 UPLOAD
 async function uploadCSV() {
-    const file = document.getElementById("fileInput").files[0];
-    const user = getUser();
+    const fileInput = document.getElementById("fileInput");
+    const file = fileInput.files[0];
 
-    if (!user) {
-        alert("Login first!");
+    if (!file) {
+        alert("Select a file first");
         return;
     }
 
-    let formData = new FormData();
+    const user = window.getUser();
+
+    if (!user) {
+        alert("Please login first");
+        return;
+    }
+
+    const formData = new FormData();
     formData.append("file", file);
-    formData.append("user_id", user.uid);
+    formData.append("user_id", user.uid);  // 🔥 CRITICAL
 
-    let response = await fetch(`${BASE_URL}/upload`, {
-        method: "POST",
-        body: formData
-    });
+    try {
+        const res = await fetch(`${BASE_URL}/upload`, {
+            method: "POST",
+            body: formData
+        });
 
-    let data = await response.json();
-    alert(JSON.stringify(data));
+        const data = await res.json();
+        console.log("UPLOAD RESPONSE:", data);
 
-    loadTables();
-}
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
 
+        alert("Upload successful!");
+        loadTables();
 
-// 🔥 QUERY
-async function runQuery() {
-    const user = getUser();
-
-    if (!user) {
-        alert("Login first!");
-        return;
+    } catch (err) {
+        console.error(err);
+        alert("Upload failed");
     }
-
-    const query = document.getElementById("query").value;
-
-    let response = await fetch(`${BASE_URL}/query`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            query: query,
-            user_id: user.uid
-        })
-    });
-
-    let data = await response.json();
-    displayResult(data);
 }
 
 
 // 🔥 LOAD TABLES
 async function loadTables() {
-    const user = getUser();
+    const user = window.getUser();
 
     if (!user) return;
 
-    let response = await fetch(`${BASE_URL}/tables`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            user_id: user.uid
-        })
-    });
+    try {
+        const res = await fetch(`${BASE_URL}/tables`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                user_id: user.uid
+            })
+        });
 
-    let data = await response.json();
+        const data = await res.json();
+        console.log("TABLES:", data);
 
-    let grouped = {};
+        displayTables(data.tables);
 
-    data.tables.forEach(table => {
-        let [sheet, name] = table.split("__");
-
-        if (!grouped[sheet]) {
-            grouped[sheet] = [];
-        }
-
-        grouped[sheet].push(name);
-    });
-
-    displayTables(grouped);
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 
 // 🔥 DISPLAY TABLES
-function displayTables(grouped) {
-    let container = document.getElementById("tables");
-    container.innerHTML = "";
+function displayTables(tables) {
+    const div = document.getElementById("tables");
+    div.innerHTML = "";
 
-    for (let sheet in grouped) {
-        let sheetDiv = document.createElement("div");
-        sheetDiv.innerHTML = `📁 <b>${sheet}</b>`;
-        sheetDiv.style.cursor = "pointer";
-
-        let tableList = document.createElement("div");
-        tableList.style.display = "none";
-        tableList.style.marginLeft = "20px";
-
-        grouped[sheet].forEach(table => {
-            let tableItem = document.createElement("div");
-            tableItem.innerHTML = `📄 ${table}`;
-            tableList.appendChild(tableItem);
-        });
-
-        sheetDiv.onclick = () => {
-            tableList.style.display =
-                tableList.style.display === "none" ? "block" : "none";
-        };
-
-        container.appendChild(sheetDiv);
-        container.appendChild(tableList);
-    }
+    tables.forEach(t => {
+        const p = document.createElement("p");
+        p.innerText = t;
+        div.appendChild(p);
+    });
 }
 
 
-// 🔥 DISPLAY RESULT
-function displayResult(data) {
-    let resultDiv = document.getElementById("result");
+// 🔥 RUN QUERY
+async function runQuery() {
+    const user = window.getUser();
+    const query = document.getElementById("query").value;
 
-    if (data.error) {
-        resultDiv.innerHTML = data.error;
+    if (!user) {
+        alert("Login first");
         return;
     }
 
-    let table = "<table border='1'><tr>";
-
-    data.columns.forEach(col => {
-        table += `<th>${col}</th>`;
-    });
-
-    table += "</tr>";
-
-    data.rows.forEach(row => {
-        table += "<tr>";
-        row.forEach(cell => {
-            table += `<td>${cell}</td>`;
+    try {
+        const res = await fetch(`${BASE_URL}/query`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                user_id: user.uid,
+                query: query
+            })
         });
-        table += "</tr>";
+
+        const data = await res.json();
+        console.log("QUERY:", data);
+
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+
+        displayResults(data);
+
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+
+// 🔥 DISPLAY RESULTS
+function displayResults(data) {
+    const div = document.getElementById("result");
+    div.innerHTML = "";
+
+    if (!data.rows) return;
+
+    const table = document.createElement("table");
+
+    // headers
+    const headerRow = document.createElement("tr");
+    data.columns.forEach(col => {
+        const th = document.createElement("th");
+        th.innerText = col;
+        headerRow.appendChild(th);
+    });
+    table.appendChild(headerRow);
+
+    // rows
+    data.rows.forEach(row => {
+        const tr = document.createElement("tr");
+        row.forEach(cell => {
+            const td = document.createElement("td");
+            td.innerText = cell;
+            tr.appendChild(td);
+        });
+        table.appendChild(tr);
     });
 
-    table += "</table>";
-
-    resultDiv.innerHTML = table;
-}
+    div.appendChild(table);
+}   

@@ -1,8 +1,17 @@
+:root {
+    --bg-main: #0f2a44;
+    --panel-bg: #000000;
+    --text-main: #ffffff;
+    --accent-green: #00ff7f;
+    --accent-yellow: #ffd700;
+    --accent-blue: #00cfff;
+    --danger-red: #ff3b3b;
+}
+
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #0f172a;
-    color: #e2e8f0;
+    background: var(--bg-main);
+    color: var(--text-main);
+    font-family: 'Courier New', monospace;
 }
 
 /* AUTH BAR */
@@ -27,16 +36,15 @@ body {
 
 /* MAIN GRID */
 .main {
-    display: flex;
+    display: grid;
+    grid-template-columns: 280px 1fr;
     height: calc(100vh - 140px);
 }
 
 /* SIDEBAR */
 .sidebar {
-    width: 250px;
-    border-right: 1px solid #1e293b;
-    padding: 10px;
-    overflow-y: auto;
+    background: var(--panel-bg);
+    border-right: 2px solid white;
 }
 
 /* WORKSPACE */
@@ -48,8 +56,8 @@ body {
 
 /* QUERY */
 .query-box {
-    padding: 10px;
-    border-bottom: 1px solid #1e293b;
+    background: var(--panel-bg);
+    border-bottom: 2px solid white;
 }
 
 textarea {
@@ -63,9 +71,7 @@ textarea {
 
 /* RESULTS */
 .results-box {
-    flex: 1;
-    padding: 10px;
-    overflow: auto;
+    background: var(--panel-bg);
 }
 
 /* TABLE STYLE */
@@ -78,4 +84,18 @@ td,
 th {
     border: 1px solid #334155;
     padding: 5px;
+}
+
+button {
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: var(--accent-blue);
+    color: black;
 }

@@ -75,18 +75,14 @@ async function loadTables() {
 
 // 🔥 DISPLAY TABLES
 function displayTables(tables) {
-    const div = document.getElementById("tables");
-    div.innerHTML = "";
+    const container = document.getElementById("tables");
+    container.innerHTML = "";
 
     const grouped = {};
 
     tables.forEach(t => {
         const [sheet] = t.split("__");
-
-        if (!grouped[sheet]) {
-            grouped[sheet] = [];
-        }
-
+        if (!grouped[sheet]) grouped[sheet] = [];
         grouped[sheet].push(t);
     });
 
@@ -96,27 +92,25 @@ function displayTables(tables) {
 
         const title = document.createElement("div");
         title.innerHTML = `📁 ${sheet}`;
-        title.onclick = () => {
-            tablesDiv.style.display =
-                tablesDiv.style.display === "none" ? "block" : "none";
-        };
 
         const tablesDiv = document.createElement("div");
         tablesDiv.className = "tables";
-        tablesDiv.style.display = "none";
 
         grouped[sheet].forEach(t => {
-            const tableItem = document.createElement("div");
-            tableItem.innerText = `└ ${t}`;
-            tablesDiv.appendChild(tableItem);
+            const item = document.createElement("div");
+            item.innerText = `└ ${t}`;
+            tablesDiv.appendChild(item);
         });
+
+        title.onclick = () => {
+            sheetDiv.classList.toggle("active");
+        };
 
         sheetDiv.appendChild(title);
         sheetDiv.appendChild(tablesDiv);
-        div.appendChild(sheetDiv);
+        container.appendChild(sheetDiv);
     }
 }
-
 
 // 🔥 RUN QUERY
 async function runQuery() {

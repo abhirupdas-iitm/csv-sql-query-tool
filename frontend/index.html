@@ -9,52 +9,46 @@
 
 <body>
 
-    <!-- 🔐 AUTH BAR -->
+    <!-- AUTH -->
     <div class="auth-bar">
         <input type="email" id="email" placeholder="Email">
         <input type="password" id="password" placeholder="Password">
         <button onclick="signup()">Sign Up</button>
         <button onclick="login()">Login</button>
         <button onclick="logout()">Logout</button>
-        <span id="authStatus">Not logged in</span>
+        <span id="authStatus"></span>
     </div>
 
-    <!-- 🔝 HEADER -->
+    <!-- HEADER -->
     <div class="header">
         <h1>SheetQL 🚀</h1>
     </div>
 
-    <!-- 📂 TOP UPLOAD BAR (CENTERED) -->
-    <div class="top-upload">
+    <!-- UPLOAD (CENTERED) -->
+    <div class="upload-center">
         <input type="file" id="fileInput">
         <button onclick="uploadCSV()">Upload File</button>
     </div>
 
-    <!-- 🧠 MAIN CONTENT -->
-    <div class="main-grid">
+    <!-- 🔥 SHEETS GRID -->
+    <div class="sheet-grid" id="tables"></div>
 
-        <!-- 📁 LEFT: SHEETS -->
-        <div class="sheet-panel">
-            <h3>Tables</h3>
-            <div id="tables" class="sheet-container"></div>
+    <!-- 🔥 BOTTOM PANELS -->
+    <div class="bottom-panels">
+
+        <!-- LOGS -->
+        <div class="panel logs-panel">
+            <h3>SQL Logs</h3>
+            <div id="logs">
+                Logs will appear here...
+            </div>
         </div>
 
-        <!-- ⚡ RIGHT: WORKSPACE -->
-        <div class="workspace-grid">
-
-            <!-- 🖥 QUERY PANEL -->
-            <div class="panel">
-                <h3>SQL Query</h3>
-                <textarea id="query">SELECT * FROM default__data;</textarea>
-                <button onclick="runQuery()">Run</button>
-            </div>
-
-            <!-- 📊 RESULTS PANEL -->
-            <div class="panel">
-                <h3>Results</h3>
-                <div id="result"></div>
-            </div>
-
+        <!-- QUERY -->
+        <div class="panel query-panel">
+            <h3>SQL Query</h3>
+            <textarea id="query">SELECT * FROM default__data;</textarea>
+            <button onclick="runQuery()">Run</button>
         </div>
 
     </div>

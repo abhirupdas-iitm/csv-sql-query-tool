@@ -44,7 +44,11 @@ window.signup = async function () {
 
         alert("User created!");
     } catch (err) {
-        alert(err.message);
+        if (err.code === "auth/account-exists-with-different-credential") {
+            alert("This email is already registered using Google. Please use Google login.");
+        } else {
+            alert(err.message);
+        }
     }
 };
 
@@ -57,7 +61,11 @@ window.login = async function () {
         await signInWithEmailAndPassword(auth, email, password);
         alert("Logged in!");
     } catch (err) {
-        alert(err.message);
+        if (err.code === "auth/account-exists-with-different-credential") {
+            alert("This email is already registered using Google. Please use Google login.");
+        } else {
+            alert(err.message);
+        }
     }
 };
 

@@ -69,9 +69,28 @@ window.login = async function () {
     }
 };
 
+window.useAnonymous = function () {
+
+    const confirmMsg = confirm(
+        "⚠ Anonymous mode: data may not be saved permanently. Continue?"
+    );
+
+    if (!confirmMsg) return;
+
+    // 🔥 generate random ID
+    const anonId = "anon_" + Math.random().toString(36).substring(2, 10);
+
+    localStorage.setItem("anon_id", anonId);
+
+    // redirect to main app
+    window.location.href = "index.html";
+};
+
 // 🔥 LOGOUT
 window.logout = async function () {
     await signOut(auth);
+    localStorage.removeItem("anon_id");
+    window.location.href = "login.html";
 };
 
 window.googleLogin = async function () {
@@ -87,15 +106,50 @@ window.googleLogin = async function () {
 
 // 🔥 TRACK USER
 onAuthStateChanged(auth, (user) => {
+
+    const anonId = localStorage.getItem("anon_id");
+
+    // ✅ CASE 1: Logged-in user
     if (user) {
         currentUser = user;
-        console.log("User logged in:", user.uid);
-        document.getElementById("authStatus").innerText =
-            `Logged in as ${user.displayName || user.email}`;
-        document.getElementById("profilePic").src = user.photoURL || "";
-    } else {
-        currentUser = null;
-        document.getElementById("authStatus").innerText = "Not logged in";
+
+        if (window.location.pathname.includes("login.html")) {
+            window.location.href = "index.html";
+        }
+
+        const status = document.getElementById("authStatus");
+        if (status) {
+            status.innerText =
+                `Logged in as ${user.displayName || user.email}`;
+        }
+
+        const pic = document.getElementById("profilePic");
+        if (pic) {
+            pic.src = user.photoURL || "";
+        }
+
+        return;
+    }
+
+    // ✅ CASE 2: Anonymous user
+    if (anonId) {
+        currentUser = { uid: anonId };
+
+        if (window.location.pathname.includes("login.html")) {
+            window.location.href = "index.html";
+        }
+
+        const status = document.getElementById("authStatus");
+        if (status) {
+            status.innerText = "Anonymous User";
+        }
+
+        return;
+    }
+
+    // ❌ CASE 3: Not logged in at all
+    if (!window.location.pathname.includes("login.html")) {
+        window.location.href = "login.html";
     }
 });
 

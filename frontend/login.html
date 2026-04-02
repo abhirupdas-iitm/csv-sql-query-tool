@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login - SheetQL</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="login-container">
+
+        <h1>SheetQL</h1>
+
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+
+        <button onclick="signup()">Sign Up</button>
+        <button onclick="login()">Login</button>
+
+        <div style="margin: 10px 0;">OR</div>
+
+        <button onclick="googleLogin()">Continue with Google</button>
+
+        <div style="margin: 15px 0;">OR</div>
+
+        <!-- 🔥 NEW -->
+        <button onclick="useAnonymous()">Use Anonymously</button>
+
+        <p id="authStatus"></p>
+
+    </div>
+
+    <script type="module" src="auth.js"></script>
+
+</body>
+
+</html>

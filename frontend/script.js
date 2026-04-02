@@ -1,5 +1,19 @@
 const BASE_URL = "https://sheetql-backend.onrender.com";
 
+// 🔥 HELPER: GET USER (handles both auth + anonymous)
+function getCurrentUser() {
+    let user = window.getUser();
+
+    if (!user) {
+        const anonId = localStorage.getItem("anon_id");
+        if (anonId) {
+            user = { uid: anonId };
+        }
+    }
+
+    return user;
+}
+
 // 🔥 UPLOAD
 async function uploadCSV() {
     const fileInput = document.getElementById("fileInput");
@@ -10,16 +24,16 @@ async function uploadCSV() {
         return;
     }
 
-    const user = window.getUser();
+    const user = getCurrentUser();
 
     if (!user) {
-        alert("Please login first");
+        alert("Please login or use anonymously first");
         return;
     }
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("user_id", user.uid);  // 🔥 CRITICAL
+    formData.append("user_id", user.uid);
 
     try {
         const res = await fetch(`${BASE_URL}/upload`, {
@@ -47,7 +61,7 @@ async function uploadCSV() {
 
 // 🔥 LOAD TABLES
 async function loadTables() {
-    const user = window.getUser();
+    const user = getCurrentUser();
 
     if (!user) return;
 
@@ -99,6 +113,12 @@ function displayTables(tables) {
         grouped[sheet].forEach(t => {
             const item = document.createElement("div");
             item.innerText = `└ ${t}`;
+
+            // 🔥 BONUS: click → auto fill query
+            item.onclick = () => {
+                document.getElementById("query").value = `SELECT * FROM ${t};`;
+            };
+
             tablesDiv.appendChild(item);
         });
 
@@ -112,13 +132,14 @@ function displayTables(tables) {
     }
 }
 
+
 // 🔥 RUN QUERY
 async function runQuery() {
-    const user = window.getUser();
+    const user = getCurrentUser();
     const query = document.getElementById("query").value;
 
     if (!user) {
-        alert("Login first");
+        alert("Login or use anonymously first");
         return;
     }
 
@@ -182,6 +203,8 @@ function displayResults(data) {
     div.appendChild(table);
 }
 
+
+// 🔥 FILE NAME DISPLAY
 document.getElementById("fileInput").addEventListener("change", function () {
     const fileName = this.files[0]?.name || "No file chosen";
     document.getElementById("fileName").innerText = fileName;

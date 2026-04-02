@@ -263,3 +263,44 @@ button:hover {
 .logs-panel .error {
     color: var(--danger-red);
 }
+
+/* 🔥 BOTTOM STRUCTURE */
+.bottom-panels {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+}
+
+/* TOP ROW (LOGS + QUERY) */
+.top-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* RESULTS PANEL */
+.results-panel {
+    background: black;
+    border: 2px solid white;
+    padding: 15px;
+    height: 250px;
+    overflow: auto;
+}
+
+.results-panel table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.results-panel th {
+    color: var(--accent-yellow);
+    border: 1px solid #334155;
+    padding: 6px;
+}
+
+.results-panel td {
+    color: white;
+    border: 1px solid #334155;
+    padding: 6px;
+}

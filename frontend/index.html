@@ -36,19 +36,30 @@
     <!-- 🔥 BOTTOM PANELS -->
     <div class="bottom-panels">
 
-        <!-- LOGS -->
-        <div class="panel logs-panel">
-            <h3>SQL Logs</h3>
-            <div id="logs">
-                Logs will appear here...
+        <!-- TOP ROW -->
+        <div class="top-row">
+
+            <!-- LOGS -->
+            <div class="panel logs-panel">
+                <h3>SQL Logs</h3>
+                <div id="logs">
+                    Logs will appear here...
+                </div>
             </div>
+
+            <!-- QUERY -->
+            <div class="panel query-panel">
+                <h3>SQL Query</h3>
+                <textarea id="query">SELECT * FROM default__data;</textarea>
+                <button onclick="runQuery()">Run</button>
+            </div>
+
         </div>
 
-        <!-- QUERY -->
-        <div class="panel query-panel">
-            <h3>SQL Query</h3>
-            <textarea id="query">SELECT * FROM default__data;</textarea>
-            <button onclick="runQuery()">Run</button>
+        <!-- 🔥 NEW: RESULTS PANEL -->
+        <div class="panel results-panel">
+            <h3>Results</h3>
+            <div id="result"></div>
         </div>
 
     </div>

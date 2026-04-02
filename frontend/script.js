@@ -14,47 +14,61 @@ function getCurrentUser() {
     return user;
 }
 
+function showLoader() {
+    document.getElementById("loader").classList.remove("hidden");
+}
+
+function hideLoader() {
+    document.getElementById("loader").classList.add("hidden");
+}
+
 // 🔥 UPLOAD
 async function uploadCSV() {
     const fileInput = document.getElementById("fileInput");
     const file = fileInput.files[0];
 
     if (!file) {
-        alert("Select a file first");
+        logMessage("No file selected", "error");
         return;
     }
 
-    const user = getCurrentUser();
+    const user = window.getUser();
 
     if (!user) {
-        alert("Please login or use anonymously first");
+        logMessage("Please login first", "error");
         return;
     }
 
     const formData = new FormData();
     formData.append("file", file);
     formData.append("user_id", user.uid);
-
+    logMessage(`Uploading: ${file.name}`, "info");
     try {
+        showLoader();
+
         const res = await fetch(`${BASE_URL}/upload`, {
             method: "POST",
             body: formData
         });
 
         const data = await res.json();
-        console.log("UPLOAD RESPONSE:", data);
 
         if (data.error) {
             logMessage(data.error, "error");
+            hideLoader();
             return;
         }
 
         logMessage("Upload successful", "success");
-        loadTables();
+
+        await loadTables();
+        logMessage("Tables loaded", "info");
 
     } catch (err) {
         console.error(err);
         logMessage("Upload failed", "error");
+    } finally {
+        hideLoader();
     }
 }
 

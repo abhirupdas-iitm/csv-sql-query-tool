@@ -109,21 +109,23 @@ onAuthStateChanged(auth, (user) => {
 
     const anonId = localStorage.getItem("anon_id");
 
-    // ✅ CASE 1: Logged-in user
+    const status = document.getElementById("authStatus");
+    const pic = document.getElementById("profilePic");
+
+    // ✅ LOGGED IN USER
     if (user) {
         currentUser = user;
 
         if (window.location.pathname.includes("login.html")) {
             window.location.href = "index.html";
+            return;
         }
 
-        const status = document.getElementById("authStatus");
         if (status) {
             status.innerText =
                 `Logged in as ${user.displayName || user.email}`;
         }
 
-        const pic = document.getElementById("profilePic");
         if (pic) {
             pic.src = user.photoURL || "";
         }
@@ -131,15 +133,15 @@ onAuthStateChanged(auth, (user) => {
         return;
     }
 
-    // ✅ CASE 2: Anonymous user
+    // ✅ ANONYMOUS USER
     if (anonId) {
         currentUser = { uid: anonId };
 
         if (window.location.pathname.includes("login.html")) {
             window.location.href = "index.html";
+            return;
         }
 
-        const status = document.getElementById("authStatus");
         if (status) {
             status.innerText = "Anonymous User";
         }
@@ -147,7 +149,7 @@ onAuthStateChanged(auth, (user) => {
         return;
     }
 
-    // ❌ CASE 3: Not logged in at all
+    // ❌ NOT LOGGED IN → REDIRECT TO LOGIN
     if (!window.location.pathname.includes("login.html")) {
         window.location.href = "login.html";
     }

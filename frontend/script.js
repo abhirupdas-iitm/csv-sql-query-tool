@@ -45,16 +45,16 @@ async function uploadCSV() {
         console.log("UPLOAD RESPONSE:", data);
 
         if (data.error) {
-            alert(data.error);
+            logMessage(data.error, "error");
             return;
         }
 
-        alert("Upload successful!");
+        logMessage("Upload successful", "success");
         loadTables();
 
     } catch (err) {
         console.error(err);
-        alert("Upload failed");
+        logMessage("Upload failed", "error");
     }
 }
 
@@ -132,6 +132,27 @@ function displayTables(tables) {
     }
 }
 
+function logMessage(message, type = "info") {
+    const logBox = document.getElementById("logs");
+
+    if (!logBox) return;
+
+    const line = document.createElement("div");
+
+    if (type === "error") {
+        line.style.color = "#ff4d4d";
+    } else if (type === "success") {
+        line.style.color = "#00ff7f";
+    } else {
+        line.style.color = "#00cfff";
+    }
+
+    line.innerText = message;
+
+    logBox.appendChild(line);
+
+    logBox.scrollTop = logBox.scrollHeight; // auto-scroll
+}
 
 // 🔥 RUN QUERY
 async function runQuery() {
@@ -156,13 +177,11 @@ async function runQuery() {
         });
 
         const data = await res.json();
-        console.log("QUERY:", data);
-
         if (data.error) {
-            alert(data.error);
+            logMessage(data.error, "error");
             return;
         }
-
+        logMessage("Query executed successfully", "success");
         displayResults(data);
 
     } catch (err) {

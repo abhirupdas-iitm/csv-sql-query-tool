@@ -6,6 +6,8 @@ import {
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged,
+    GoogleAuthProvider,
+    signInWithPopup,
     updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -64,6 +66,17 @@ window.logout = async function () {
     await signOut(auth);
 };
 
+window.googleLogin = async function () {
+    const provider = new GoogleAuthProvider();
+
+    try {
+        const result = await signInWithPopup(auth, provider);
+        console.log("Google login success:", result.user);
+    } catch (err) {
+        alert(err.message);
+    }
+};
+
 // 🔥 TRACK USER
 onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -71,6 +84,7 @@ onAuthStateChanged(auth, (user) => {
         console.log("User logged in:", user.uid);
         document.getElementById("authStatus").innerText =
             `Logged in as ${user.displayName || user.email}`;
+        document.getElementById("profilePic").src = user.photoURL || "";
     } else {
         currentUser = null;
         document.getElementById("authStatus").innerText = "Not logged in";

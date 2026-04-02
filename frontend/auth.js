@@ -6,6 +6,7 @@ import {
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged
+    updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // Your web app's Firebase configuration
@@ -30,8 +31,15 @@ window.signup = async function () {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
+    const name = prompt("Enter your name:");
+
     try {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+
+        await updateProfile(userCred.user, {
+            displayName: name
+        });
+
         alert("User created!");
     } catch (err) {
         alert(err.message);
@@ -61,7 +69,8 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
         console.log("User logged in:", user.uid);
-        document.getElementById("authStatus").innerText = `Logged in as ${user.email}`;
+        document.getElementById("authStatus").innerText =
+            `Logged in as ${user.displayName || user.email}`;
     } else {
         currentUser = null;
         document.getElementById("authStatus").innerText = "Not logged in";

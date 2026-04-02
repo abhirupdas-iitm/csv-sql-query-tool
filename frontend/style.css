@@ -375,3 +375,86 @@ button:hover {
         transform: rotate(360deg);
     }
 }
+
+/* LOGIN PAGE */
+.login-body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #1f3b63;
+    font-family: 'Courier New', monospace;
+}
+
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.login-title {
+    color: #00ff7f;
+    font-size: 40px;
+    font-weight: bold;
+}
+
+/* INPUTS */
+.login-inputs {
+    display: flex;
+    gap: 30px;
+}
+
+.login-inputs input {
+    padding: 10px;
+    font-weight: bold;
+    border: none;
+    width: 200px;
+    text-align: center;
+}
+
+/* BUTTON GROUP */
+.login-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.login-buttons button {
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+    padding: 8px 18px;
+    cursor: pointer;
+}
+
+/* DIVIDER */
+.divider {
+    color: white;
+    font-weight: bold;
+}
+
+/* GOOGLE BUTTON */
+.google-btn {
+    border: 2px solid white;
+    background: transparent;
+    color: white;
+    padding: 10px 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* ANON BUTTON */
+.anon-btn {
+    border: 2px solid white;
+    background: transparent;
+    color: red;
+    padding: 10px 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #00cfff;
+    color: black;
+}

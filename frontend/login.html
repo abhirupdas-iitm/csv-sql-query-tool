@@ -7,28 +7,35 @@
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
+<body class="login-body">
 
     <div class="login-container">
 
-        <h1>SheetQL</h1>
+        <h1 class="login-title">SheetQL</h1>
 
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
+        <!-- INPUTS -->
+        <div class="login-inputs">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+        </div>
 
-        <button onclick="signup()">Sign Up</button>
-        <button onclick="login()">Login</button>
+        <!-- BUTTONS -->
+        <div class="login-buttons">
+            <button onclick="signup()">Sign Up</button>
+            <button onclick="login()">Login</button>
+        </div>
 
-        <div style="margin: 10px 0;">OR</div>
+        <p class="divider">OR</p>
 
-        <button onclick="googleLogin()">Continue with Google</button>
+        <button class="google-btn" onclick="googleLogin()">
+            Continue with Google
+        </button>
 
-        <div style="margin: 15px 0;">OR</div>
+        <p class="divider">OR</p>
 
-        <!-- 🔥 NEW -->
-        <button onclick="useAnonymous()">Use Anonymously</button>
-
-        <p id="authStatus"></p>
+        <button class="anon-btn" onclick="useAnonymous()">
+            Use anonymously
+        </button>
 
     </div>
 

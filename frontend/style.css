@@ -458,3 +458,7 @@ button:hover {
     background: #00cfff;
     color: black;
 }
+
+.hidden {
+    display: none;
+}

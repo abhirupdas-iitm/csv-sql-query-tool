@@ -107,6 +107,9 @@ window.googleLogin = async function () {
 // 🔥 TRACK USER
 onAuthStateChanged(auth, (user) => {
 
+    const loader = document.getElementById("authLoader");
+    const app = document.getElementById("appContent");
+
     const anonId = localStorage.getItem("anon_id");
 
     const status = document.getElementById("authStatus");
@@ -130,6 +133,10 @@ onAuthStateChanged(auth, (user) => {
             pic.src = user.photoURL || "";
         }
 
+        // 🔥 SHOW APP AFTER AUTH CHECK
+        if (loader) loader.classList.add("hidden");
+        if (app) app.classList.remove("hidden");
+
         return;
     }
 
@@ -146,10 +153,14 @@ onAuthStateChanged(auth, (user) => {
             status.innerText = "Anonymous User";
         }
 
+        // 🔥 SHOW APP
+        if (loader) loader.classList.add("hidden");
+        if (app) app.classList.remove("hidden");
+
         return;
     }
 
-    // ❌ NOT LOGGED IN → REDIRECT TO LOGIN
+    // ❌ NOT LOGGED IN
     if (!window.location.pathname.includes("login.html")) {
         window.location.href = "login.html";
     }

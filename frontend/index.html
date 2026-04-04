@@ -8,69 +8,76 @@
 </head>
 
 <body>
-    <div id="loader" class="loader hidden">
+
+    <!-- 🔥 AUTH LOADER (VISIBLE FIRST) -->
+    <div id="authLoader" class="loader">
         <div class="spinner"></div>
-        <p>Uploading & processing...</p>
-    </div>
-    <!-- AUTH -->
-    <div class="auth-bar">
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
-        <button onclick="googleLogin()">Continue with Google</button>
-        <button onclick="signup()">Sign Up</button>
-        <button onclick="login()">Login</button>
-        <button onclick="logout()">Logout</button>
-        <span id="authStatus"></span>
-        <img id="profilePic" width="30" style="border-radius:50%; margin-left:10px;">
+        <p>Checking authentication...</p>
     </div>
 
-    <!-- HEADER -->
-    <div class="header">
-        <h1>SheetQL</h1>
-    </div>
+    <!-- 🔥 MAIN APP (HIDDEN INITIALLY) -->
+    <div id="appContent" class="hidden">
 
-    <!-- UPLOAD (CENTERED) -->
-    <div class="upload-center">
-        <label class="custom-file-upload">
-            Choose File
-            <input type="file" id="fileInput">
-        </label>
-
-        <span id="fileName">No file chosen</span>
-
-        <button onclick="uploadCSV()">Upload File</button>
-    </div>
-
-    <!-- 🔥 SHEETS GRID -->
-    <div class="sheet-grid" id="tables"></div>
-
-    <!-- 🔥 BOTTOM PANELS -->
-    <div class="bottom-panels">
-
-        <!-- TOP ROW -->
-        <div class="top-row">
-
-            <!-- LOGS -->
-            <div class="panel logs-panel">
-                <h3>SQL Logs</h3>
-                <div class="logs" id="logs">
-                    Logs will appear here...
-                </div>
-            </div>
-
-            <!-- QUERY -->
-            <div class="panel query-panel">
-                <h3>SQL Query</h3>
-                <textarea id="query">SELECT * FROM default__data;</textarea>
-                <button onclick="runQuery()">Run</button>
-            </div>
-
+        <!-- AUTH -->
+        <div class="auth-bar">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="googleLogin()">Continue with Google</button>
+            <button onclick="signup()">Sign Up</button>
+            <button onclick="login()">Login</button>
+            <button onclick="logout()">Logout</button>
+            <span id="authStatus"></span>
+            <img id="profilePic" width="30" style="border-radius:50%; margin-left:10px;">
         </div>
 
-        <!-- 🔥 NEW: RESULTS PANEL -->
-        <div class="panel results-panel">
-            <h3>Results</h3>
-            <div id="result"></div>
+        <!-- HEADER -->
+        <div class="header">
+            <h1>SheetQL</h1>
+        </div>
+
+        <!-- UPLOAD -->
+        <div class="upload-center">
+            <label class="custom-file-upload">
+                Choose File
+                <input type="file" id="fileInput">
+            </label>
+
+            <span id="fileName">No file chosen</span>
+
+            <button onclick="uploadCSV()">Upload File</button>
+        </div>
+
+        <!-- TABLES -->
+        <div class="sheet-grid" id="tables"></div>
+
+        <!-- PANELS -->
+        <div class="bottom-panels">
+
+            <div class="top-row">
+
+                <!-- LOGS -->
+                <div class="panel logs-panel">
+                    <h3>SQL Logs</h3>
+                    <div class="logs" id="logs">
+                        Logs will appear here...
+                    </div>
+                </div>
+
+                <!-- QUERY -->
+                <div class="panel query-panel">
+                    <h3>SQL Query</h3>
+                    <textarea id="query">SELECT * FROM default__data;</textarea>
+                    <button onclick="runQuery()">Run</button>
+                </div>
+
+            </div>
+
+            <!-- RESULTS -->
+            <div class="panel results-panel">
+                <h3>Results</h3>
+                <div id="result"></div>
+            </div>
+
         </div>
 
     </div>

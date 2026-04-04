@@ -128,6 +128,24 @@ onAuthStateChanged(auth, (user) => {
 
     // ✅ LOGGED IN USER
     if (user) {
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const signupBtn = document.querySelector('button[onclick="signup()"]');
+        const loginBtn = document.querySelector('button[onclick="login()"]');
+        const googleBtn = document.querySelector('button[onclick="googleLogin()"]');
+        const logoutBtn = document.querySelector('button[onclick="logout()"]');
+        const authBar = document.querySelector(".auth-bar");
+
+        // 🔥 HIDE unnecessary stuff
+        if (emailInput) emailInput.style.display = "none";
+        if (passwordInput) passwordInput.style.display = "none";
+        if (signupBtn) signupBtn.style.display = "none";
+        if (loginBtn) loginBtn.style.display = "none";
+
+        // 🔥 CENTER remaining buttons
+        if (authBar) {
+            authBar.style.justifyContent = "center";
+        }
         currentUser = user;
 
         if (window.location.pathname.includes("login.html")) {

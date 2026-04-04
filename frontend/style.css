@@ -42,9 +42,13 @@ h3 {
 }
 
 #authStatus {
-    position: absolute;
-    right: 20px;
     color: var(--accent-green-bright);
+    margin-left: auto;
+    margin-right: 10px;
+}
+
+#profilePic {
+    margin-right: 10px;
 }
 
 /* HEADER */
@@ -327,4 +331,11 @@ button:hover {
     color: var(--text-dark);
     border: none;
     font-weight: bold;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
 }

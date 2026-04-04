@@ -15,6 +15,12 @@
         <p>Checking authentication...</p>
     </div>
 
+    <!-- 🔥 GLOBAL PROCESS LOADER -->
+    <div id="loader" class="loader hidden">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+
     <!-- 🔥 MAIN APP (HIDDEN INITIALLY) -->
     <div id="appContent" class="hidden">
 
@@ -37,10 +43,14 @@
 
         <!-- UPLOAD -->
         <div class="upload-center">
-            <label class="custom-file-upload">
+
+            <!-- ✅ FIXED BUTTON (no label anymore) -->
+            <button class="custom-file-upload" id="chooseFileBtn">
                 Choose File
-                <input type="file" id="fileInput" hidden>
-            </label>
+            </button>
+
+            <!-- hidden real input -->
+            <input type="file" id="fileInput" hidden>
 
             <span id="fileName">No file chosen</span>
 
@@ -84,6 +94,13 @@
 
     <script src="script.js"></script>
     <script type="module" src="auth.js"></script>
+
+    <!-- 🔥 FIXED FILE PICKER LOGIC -->
+    <script>
+        document.getElementById("chooseFileBtn").addEventListener("click", () => {
+            document.getElementById("fileInput").click();
+        });
+    </script>
 
 </body>
 

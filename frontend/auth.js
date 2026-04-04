@@ -11,6 +11,16 @@ import {
     updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    where,
+    orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
 // Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDfqzhtRbh25ITYaTN9W0kA9VHfvj1rG5Y",
@@ -24,6 +34,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 // 🔴 GLOBAL USER (IMPORTANT)
 let currentUser = null;
@@ -169,4 +180,46 @@ onAuthStateChanged(auth, (user) => {
 // 🔥 EXPORT USER
 window.getUser = function () {
     return currentUser;
+};
+
+// 🔥 SAVE QUERY HISTORY
+window.saveQuery = async function (queryText) {
+    const user = window.getUser();
+
+    if (!user) return;
+
+    try {
+        await addDoc(collection(db, "queries"), {
+            user_id: user.uid,
+            query: queryText,
+            created_at: new Date()
+        });
+    } catch (err) {
+        console.error("Error saving query:", err);
+    }
+};
+
+window.getQueryHistory = async function () {
+    const user = window.getUser();
+    if (!user) return [];
+
+    try {
+        const q = query(
+            collection(db, "queries"),
+            where("user_id", "==", user.uid),
+            orderBy("created_at", "desc")
+        );
+
+        const snapshot = await getDocs(q);
+
+        const results = [];
+        snapshot.forEach(doc => {
+            results.push(doc.data());
+        });
+
+        return results;
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
 };

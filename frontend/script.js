@@ -196,6 +196,11 @@ async function runQuery() {
             return;
         }
         logMessage("Query executed successfully", "success");
+
+        // 🔥 SAVE TO FIRESTORE
+        window.saveQuery(query);
+
+
         displayResults(data);
 
     } catch (err) {

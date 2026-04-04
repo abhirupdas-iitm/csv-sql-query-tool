@@ -242,3 +242,7 @@ document.getElementById("fileInput").addEventListener("change", function () {
     const fileName = this.files[0]?.name || "No file chosen";
     document.getElementById("fileName").innerText = fileName;
 });
+
+document.querySelector(".custom-file-upload").addEventListener("click", () => {
+    document.getElementById("fileInput").click();
+});

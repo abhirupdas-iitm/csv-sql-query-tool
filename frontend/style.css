@@ -321,3 +321,10 @@ button:hover {
     padding: 10px 20px;
     font-weight: bold;
 }
+
+.custom-file-upload {
+    background: var(--accent-green);
+    color: var(--text-dark);
+    border: none;
+    font-weight: bold;
+}

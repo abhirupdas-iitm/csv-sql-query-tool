@@ -9,7 +9,7 @@
 
 <body>
 
-    <!-- 🔥 AUTH LOADER (VISIBLE FIRST) -->
+    <!-- 🔥 AUTH LOADER -->
     <div id="authLoader" class="loader">
         <div class="spinner"></div>
         <p>Checking authentication...</p>
@@ -21,7 +21,7 @@
         <p>Processing...</p>
     </div>
 
-    <!-- 🔥 MAIN APP (HIDDEN INITIALLY) -->
+    <!-- 🔥 MAIN APP -->
     <div id="appContent" class="hidden">
 
         <!-- AUTH -->
@@ -45,15 +45,10 @@
 
         <!-- UPLOAD -->
         <div class="upload-center">
-
-            <!-- ✅ FIXED BUTTON (no label anymore) -->
             <button class="custom-file-upload" id="chooseFileBtn">
                 Choose File
             </button>
-
-            <!-- hidden real input -->
             <input type="file" id="fileInput" hidden>
-
             <span id="fileName">No file chosen</span>
         </div>
 
@@ -65,19 +60,27 @@
 
             <div class="top-row">
 
-                <!-- LOGS -->
-                <div class="panel logs-panel">
-                    <h3>SQL Logs</h3>
-                    <div class="logs" id="logs">
-                        Logs will appear here...
-                    </div>
-                </div>
+                <!-- 🔥 RESIZABLE -->
+                <div class="resizable-container">
 
-                <!-- QUERY -->
-                <div class="panel query-panel">
-                    <h3>SQL Query</h3>
-                    <textarea id="query">SELECT * FROM default__data;</textarea>
-                    <button onclick="runQuery()">Run</button>
+                    <!-- LOGS -->
+                    <div class="panel logs-panel" id="logsPanel">
+                        <h3>SQL Logs</h3>
+                        <div class="logs" id="logs">
+                            Logs will appear here...
+                        </div>
+                    </div>
+
+                    <!-- 🔥 DIVIDER -->
+                    <div class="divider" id="divider"></div>
+
+                    <!-- QUERY -->
+                    <div class="panel query-panel" id="queryPanel">
+                        <h3>SQL Query</h3>
+                        <textarea id="query">SELECT * FROM default__data;</textarea>
+                        <button onclick="runQuery()">Run</button>
+                    </div>
+
                 </div>
 
             </div>
@@ -95,7 +98,6 @@
     <script src="script.js"></script>
     <script type="module" src="auth.js"></script>
 
-    <!-- 🔥 FIXED FILE PICKER LOGIC -->
     <script>
         document.getElementById("chooseFileBtn").addEventListener("click", () => {
             document.getElementById("fileInput").click();

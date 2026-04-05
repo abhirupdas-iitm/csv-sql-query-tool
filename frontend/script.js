@@ -73,10 +73,10 @@ async function uploadCSV() {
             return;
         }
 
-        logMessage("✅ Tables ready", "success");
+        logMessage("Tables ready", "success");
 
         await loadTables();
-        logMessage("📊 Tables loaded", "info");
+        logMessage("Tables loaded", "info");
 
     } catch (err) {
         console.error(err);
@@ -203,7 +203,7 @@ async function runQuery() {
             return;
         }
 
-        logMessage("✅ Query executed", "success");
+        logMessage("Query executed", "success");
         window.saveQuery(query);
 
         displayResults(data);
@@ -254,4 +254,40 @@ document.getElementById("fileInput").addEventListener("change", function () {
     setTimeout(() => {
         uploadCSV();
     }, 800);
+});
+
+// 🔥 RESIZABLE LOGS ↔ QUERY
+window.addEventListener("load", () => {
+    const divider = document.getElementById("divider");
+    const logsPanel = document.getElementById("logsPanel");
+    const queryPanel = document.getElementById("queryPanel");
+    const container = document.querySelector(".resizable-container");
+
+    let isDragging = false;
+
+    divider.addEventListener("mousedown", () => {
+        isDragging = true;
+        document.body.style.cursor = "col-resize";
+    });
+
+    document.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+
+        const rect = container.getBoundingClientRect();
+        let offsetX = e.clientX - rect.left;
+        let total = rect.width;
+
+        let logsWidth = (offsetX / total) * 100;
+        let queryWidth = 100 - logsWidth;
+
+        if (logsWidth < 10 || queryWidth < 20) return;
+
+        logsPanel.style.width = logsWidth + "%";
+        queryPanel.style.width = queryWidth + "%";
+    });
+
+    document.addEventListener("mouseup", () => {
+        isDragging = false;
+        document.body.style.cursor = "default";
+    });
 });

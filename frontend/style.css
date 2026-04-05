@@ -345,3 +345,30 @@ button:hover {
     gap: 10px;
     margin-left: auto;
 }
+
+/* 🔥 RESIZABLE PANELS */
+.resizable-container {
+    display: flex;
+    width: 100%;
+}
+
+#logsPanel {
+    width: 50%;
+    min-width: 10%;
+}
+
+#queryPanel {
+    width: 50%;
+    min-width: 20%;
+}
+
+/* 🔥 DIVIDER */
+.divider {
+    width: 6px;
+    background: var(--accent-green);
+    cursor: col-resize;
+}
+
+.divider:hover {
+    background: var(--accent-green-bright);
+}

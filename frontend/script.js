@@ -1,24 +1,75 @@
 const BASE_URL = "https://sheetql-backend.onrender.com";
 
-// 🔥 PRE-WARM BACKEND (Silent)
+// 🔥 PRE-WARM BACKEND
 window.addEventListener("load", async () => {
     try {
         await fetch(`${BASE_URL}/`);
         console.log("Backend warmed up");
-    } catch (err) {
+    } catch {
         console.log("Pre-warm failed (safe to ignore)");
     }
 });
 
-// 🔥 HELPER: GET USER (handles both auth + anonymous)
+// 🔥 INIT AFTER DOM LOAD
+window.addEventListener("DOMContentLoaded", () => {
+
+    // 🔥 SIDEBAR TOGGLE
+    const menuToggle = document.getElementById("menuToggle");
+    const sidebar = document.getElementById("sidebar");
+
+    if (menuToggle && sidebar) {
+        menuToggle.addEventListener("click", () => {
+            sidebar.classList.toggle("active");
+        });
+    }
+
+    // ❌ REMOVED duplicate file trigger here (IMPORTANT)
+
+    // 🔥 RESIZABLE PANELS
+    const divider = document.getElementById("divider");
+    const logsPanel = document.getElementById("logsPanel");
+    const queryPanel = document.getElementById("queryPanel");
+    const container = document.querySelector(".resizable-container");
+
+    let isDragging = false;
+
+    if (divider) {
+        divider.addEventListener("mousedown", () => {
+            isDragging = true;
+            document.body.style.cursor = "col-resize";
+        });
+
+        document.addEventListener("mousemove", (e) => {
+            if (!isDragging) return;
+
+            const rect = container.getBoundingClientRect();
+            let offsetX = e.clientX - rect.left;
+            let total = rect.width;
+
+            let logsWidth = (offsetX / total) * 100;
+            let queryWidth = 100 - logsWidth;
+
+            if (logsWidth < 10 || queryWidth < 20) return;
+
+            logsPanel.style.width = logsWidth + "%";
+            queryPanel.style.width = queryWidth + "%";
+        });
+
+        document.addEventListener("mouseup", () => {
+            isDragging = false;
+            document.body.style.cursor = "default";
+        });
+    }
+
+});
+
+// 🔥 USER HELPER
 function getCurrentUser() {
     let user = window.getUser();
 
     if (!user) {
         const anonId = localStorage.getItem("anon_id");
-        if (anonId) {
-            user = { uid: anonId };
-        }
+        if (anonId) user = { uid: anonId };
     }
 
     return user;
@@ -32,22 +83,31 @@ function hideLoader() {
     document.getElementById("loader").classList.add("hidden");
 }
 
+// 🔥 LOGS
+function logMessage(message, type = "info") {
+    const logBox = document.getElementById("logs");
+    if (!logBox) return;
+
+    const line = document.createElement("div");
+
+    if (type === "error") line.style.color = "#ff4d4d";
+    else if (type === "success") line.style.color = "#00ff7f";
+    else line.style.color = "#00cfff";
+
+    line.innerText = message;
+    logBox.appendChild(line);
+    logBox.scrollTop = logBox.scrollHeight;
+}
+
 // 🔥 UPLOAD
 async function uploadCSV() {
     const fileInput = document.getElementById("fileInput");
     const file = fileInput.files[0];
 
-    if (!file) {
-        logMessage("No file selected", "error");
-        return;
-    }
+    if (!file) return;
 
     const user = getCurrentUser();
-
-    if (!user) {
-        logMessage("Please login first", "error");
-        return;
-    }
+    if (!user) return;
 
     const formData = new FormData();
     formData.append("file", file);
@@ -58,8 +118,6 @@ async function uploadCSV() {
     try {
         showLoader();
 
-        logMessage("⚙ Processing data...", "info");
-
         const res = await fetch(`${BASE_URL}/upload`, {
             method: "POST",
             body: formData
@@ -69,14 +127,11 @@ async function uploadCSV() {
 
         if (data.error) {
             logMessage(data.error, "error");
-            hideLoader();
             return;
         }
 
         logMessage("Tables ready", "success");
-
         await loadTables();
-        logMessage("Tables loaded", "info");
 
     } catch (err) {
         console.error(err);
@@ -89,26 +144,16 @@ async function uploadCSV() {
 // 🔥 LOAD TABLES
 async function loadTables() {
     const user = getCurrentUser();
-
     if (!user) return;
 
-    try {
-        const res = await fetch(`${BASE_URL}/tables`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                user_id: user.uid
-            })
-        });
+    const res = await fetch(`${BASE_URL}/tables`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: user.uid })
+    });
 
-        const data = await res.json();
-        displayTables(data.tables);
-
-    } catch (err) {
-        console.error(err);
-    }
+    const data = await res.json();
+    displayTables(data.tables);
 }
 
 // 🔥 DISPLAY TABLES
@@ -137,17 +182,13 @@ function displayTables(tables) {
         grouped[sheet].forEach(t => {
             const item = document.createElement("div");
             item.innerText = `└ ${t}`;
-
             item.onclick = () => {
                 document.getElementById("query").value = `SELECT * FROM ${t};`;
             };
-
             tablesDiv.appendChild(item);
         });
 
-        title.onclick = () => {
-            sheetDiv.classList.toggle("active");
-        };
+        title.onclick = () => sheetDiv.classList.toggle("active");
 
         sheetDiv.appendChild(title);
         sheetDiv.appendChild(tablesDiv);
@@ -155,65 +196,34 @@ function displayTables(tables) {
     }
 }
 
-function logMessage(message, type = "info") {
-    const logBox = document.getElementById("logs");
-    if (!logBox) return;
-
-    const line = document.createElement("div");
-
-    if (type === "error") {
-        line.style.color = "#ff4d4d";
-    } else if (type === "success") {
-        line.style.color = "#00ff7f";
-    } else {
-        line.style.color = "#00cfff";
-    }
-
-    line.innerText = message;
-    logBox.appendChild(line);
-    logBox.scrollTop = logBox.scrollHeight;
-}
-
 // 🔥 RUN QUERY
 async function runQuery() {
     const user = getCurrentUser();
     const query = document.getElementById("query").value;
 
-    if (!user) {
-        alert("Login or use anonymously first");
+    if (!user) return;
+
+    const res = await fetch(`${BASE_URL}/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: user.uid, query })
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+        logMessage(data.error, "error");
         return;
     }
 
-    try {
-        const res = await fetch(`${BASE_URL}/query`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                user_id: user.uid,
-                query: query
-            })
-        });
+    logMessage("Query executed", "success");
+    window.saveQuery(query);
 
-        const data = await res.json();
-
-        if (data.error) {
-            logMessage(data.error, "error");
-            return;
-        }
-
-        logMessage("Query executed", "success");
-        window.saveQuery(query);
-
-        displayResults(data);
-
-    } catch (err) {
-        console.error(err);
-    }
+    displayResults(data);
+    loadHistory();
 }
 
-// 🔥 DISPLAY RESULTS
+// 🔥 RESULTS
 function displayResults(data) {
     const div = document.getElementById("result");
     div.innerHTML = "";
@@ -243,66 +253,12 @@ function displayResults(data) {
     div.appendChild(table);
 }
 
-// 🔥 AUTO UPLOAD ON FILE SELECT
-document.getElementById("fileInput").addEventListener("change", function () {
-    const file = this.files[0];
-    if (!file) return;
-
-    document.getElementById("fileName").innerText = file.name;
-    logMessage(`📄 File selected: ${file.name}`, "info");
-
-    setTimeout(() => {
-        uploadCSV();
-    }, 800);
-});
-
-// 🔥 RESIZABLE LOGS ↔ QUERY
-window.addEventListener("load", () => {
-    const divider = document.getElementById("divider");
-    const logsPanel = document.getElementById("logsPanel");
-    const queryPanel = document.getElementById("queryPanel");
-    const container = document.querySelector(".resizable-container");
-
-    let isDragging = false;
-
-    divider.addEventListener("mousedown", () => {
-        isDragging = true;
-        document.body.style.cursor = "col-resize";
-    });
-
-    document.addEventListener("mousemove", (e) => {
-        if (!isDragging) return;
-
-        const rect = container.getBoundingClientRect();
-        let offsetX = e.clientX - rect.left;
-        let total = rect.width;
-
-        let logsWidth = (offsetX / total) * 100;
-        let queryWidth = 100 - logsWidth;
-
-        if (logsWidth < 10 || queryWidth < 20) return;
-
-        logsPanel.style.width = logsWidth + "%";
-        queryPanel.style.width = queryWidth + "%";
-    });
-
-    document.addEventListener("mouseup", () => {
-        isDragging = false;
-        document.body.style.cursor = "default";
-    });
-});
-
-// 🔥 LOAD HISTORY
+// 🔥 HISTORY
 async function loadHistory() {
     const historyDiv = document.getElementById("historyList");
-    historyDiv.innerHTML = "Loading...";
+    if (!historyDiv) return;
 
     const queries = await window.getQueryHistory();
-
-    if (!queries || queries.length === 0) {
-        historyDiv.innerHTML = "No queries yet...";
-        return;
-    }
 
     historyDiv.innerHTML = "";
 
@@ -310,16 +266,10 @@ async function loadHistory() {
         const item = document.createElement("div");
         item.className = "history-item";
 
-        const qText = document.createElement("div");
-        qText.className = "history-query";
-        qText.innerText = q.query;
-
-        const time = document.createElement("div");
-        time.className = "history-time";
-        time.innerText = new Date(q.created_at.seconds * 1000).toLocaleString();
-
-        item.appendChild(qText);
-        item.appendChild(time);
+        item.innerHTML = `
+            <div class="history-query">${q.query}</div>
+            <div class="history-time">${new Date(q.created_at.seconds * 1000).toLocaleString()}</div>
+        `;
 
         item.onclick = () => {
             document.getElementById("query").value = q.query;
@@ -328,16 +278,3 @@ async function loadHistory() {
         historyDiv.appendChild(item);
     });
 }
-
-// 🔥 LOAD ON START
-window.addEventListener("load", () => {
-    setTimeout(loadHistory, 1000);
-});
-
-// 🔥 REFRESH AFTER QUERY
-const originalRunQuery = runQuery;
-
-runQuery = async function () {
-    await originalRunQuery();
-    loadHistory();
-};

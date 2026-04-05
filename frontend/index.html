@@ -23,86 +23,88 @@
 
     <!-- 🔥 MAIN APP -->
     <div id="appContent" class="hidden">
+        <div class="app-layout">
 
-        <!-- AUTH -->
-        <div class="auth-bar">
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="password" placeholder="Password">
-            <button onclick="googleLogin()">Continue with Google</button>
-            <button onclick="signup()">Sign Up</button>
-            <button onclick="login()">Login</button>
-            <button onclick="logout()">Logout</button>
-            <div class="user-info">
-                <span id="authStatus"></span>
-                <img id="profilePic" width="30">
+            <!-- 🔥 SIDEBAR -->
+            <div class="sidebar">
+                <h3>History</h3>
+                <div id="historyList">No queries yet...</div>
             </div>
-        </div>
 
-        <!-- HEADER -->
-        <div class="header">
-            <h1>SheetQL</h1>
-        </div>
+            <!-- 🔥 MAIN CONTENT -->
+            <div class="main-content">
 
-        <!-- UPLOAD -->
-        <div class="upload-center">
-            <button class="custom-file-upload" id="chooseFileBtn">
-                Choose File
-            </button>
-            <input type="file" id="fileInput" hidden>
-            <span id="fileName">No file chosen</span>
-        </div>
+                <!-- AUTH -->
+                <div class="auth-bar">
+                    <input type="email" id="email" placeholder="Email">
+                    <input type="password" id="password" placeholder="Password">
+                    <button onclick="googleLogin()">Continue with Google</button>
+                    <button onclick="signup()">Sign Up</button>
+                    <button onclick="login()">Login</button>
+                    <button onclick="logout()">Logout</button>
+                    <div class="user-info">
+                        <span id="authStatus"></span>
+                        <img id="profilePic" width="30">
+                    </div>
+                </div>
 
-        <!-- TABLES -->
-        <div class="sheet-grid" id="tables"></div>
+                <!-- HEADER -->
+                <div class="header">
+                    <h1>SheetQL</h1>
+                </div>
 
-        <!-- PANELS -->
-        <div class="bottom-panels">
+                <!-- UPLOAD -->
+                <div class="upload-center">
+                    <button class="custom-file-upload" id="chooseFileBtn">
+                        Choose File
+                    </button>
+                    <input type="file" id="fileInput" hidden>
+                    <span id="fileName">No file chosen</span>
+                </div>
 
-            <div class="top-row">
+                <!-- TABLES -->
+                <div class="sheet-grid" id="tables"></div>
 
-                <!-- 🔥 RESIZABLE -->
-                <div class="resizable-container">
+                <!-- PANELS -->
+                <div class="bottom-panels">
 
-                    <!-- LOGS -->
-                    <div class="panel logs-panel" id="logsPanel">
-                        <h3>SQL Logs</h3>
-                        <div class="logs" id="logs">
-                            Logs will appear here...
+                    <div class="top-row">
+                        <div class="resizable-container">
+
+                            <div class="panel logs-panel" id="logsPanel">
+                                <h3>SQL Logs</h3>
+                                <div class="logs" id="logs"></div>
+                            </div>
+
+                            <div class="divider" id="divider"></div>
+
+                            <div class="panel query-panel" id="queryPanel">
+                                <h3>SQL Query</h3>
+                                <textarea id="query"></textarea>
+                                <button onclick="runQuery()">Run</button>
+                            </div>
+
                         </div>
                     </div>
 
-                    <!-- 🔥 DIVIDER -->
-                    <div class="divider" id="divider"></div>
-
-                    <!-- QUERY -->
-                    <div class="panel query-panel" id="queryPanel">
-                        <h3>SQL Query</h3>
-                        <textarea id="query">SELECT * FROM default__data;</textarea>
-                        <button onclick="runQuery()">Run</button>
+                    <div class="panel results-panel">
+                        <h3>Results</h3>
+                        <div id="result"></div>
                     </div>
 
                 </div>
 
             </div>
-
-            <!-- RESULTS -->
-            <div class="panel results-panel">
-                <h3>Results</h3>
-                <div id="result"></div>
-            </div>
-
         </div>
 
-    </div>
+        <script src="script.js"></script>
+        <script type="module" src="auth.js"></script>
 
-    <script src="script.js"></script>
-    <script type="module" src="auth.js"></script>
-
-    <script>
-        document.getElementById("chooseFileBtn").addEventListener("click", () => {
-            document.getElementById("fileInput").click();
-        });
-    </script>
+        <script>
+            document.getElementById("chooseFileBtn").addEventListener("click", () => {
+                document.getElementById("fileInput").click();
+            });
+        </script>
 
 </body>
 

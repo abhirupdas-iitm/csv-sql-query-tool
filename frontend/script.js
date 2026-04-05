@@ -291,3 +291,53 @@ window.addEventListener("load", () => {
         document.body.style.cursor = "default";
     });
 });
+
+// 🔥 LOAD HISTORY
+async function loadHistory() {
+    const historyDiv = document.getElementById("historyList");
+    historyDiv.innerHTML = "Loading...";
+
+    const queries = await window.getQueryHistory();
+
+    if (!queries || queries.length === 0) {
+        historyDiv.innerHTML = "No queries yet...";
+        return;
+    }
+
+    historyDiv.innerHTML = "";
+
+    queries.forEach(q => {
+        const item = document.createElement("div");
+        item.className = "history-item";
+
+        const qText = document.createElement("div");
+        qText.className = "history-query";
+        qText.innerText = q.query;
+
+        const time = document.createElement("div");
+        time.className = "history-time";
+        time.innerText = new Date(q.created_at.seconds * 1000).toLocaleString();
+
+        item.appendChild(qText);
+        item.appendChild(time);
+
+        item.onclick = () => {
+            document.getElementById("query").value = q.query;
+        };
+
+        historyDiv.appendChild(item);
+    });
+}
+
+// 🔥 LOAD ON START
+window.addEventListener("load", () => {
+    setTimeout(loadHistory, 1000);
+});
+
+// 🔥 REFRESH AFTER QUERY
+const originalRunQuery = runQuery;
+
+runQuery = async function () {
+    await originalRunQuery();
+    loadHistory();
+};

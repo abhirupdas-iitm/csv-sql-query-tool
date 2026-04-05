@@ -1,5 +1,15 @@
 const BASE_URL = "https://sheetql-backend.onrender.com";
 
+// 🔥 PRE-WARM BACKEND (Silent)
+window.addEventListener("load", async () => {
+    try {
+        await fetch(`${BASE_URL}/`);
+        console.log("Backend warmed up");
+    } catch (err) {
+        console.log("Pre-warm failed (safe to ignore)");
+    }
+});
+
 // 🔥 HELPER: GET USER (handles both auth + anonymous)
 function getCurrentUser() {
     let user = window.getUser();
@@ -32,7 +42,7 @@ async function uploadCSV() {
         return;
     }
 
-    const user = window.getUser();
+    const user = getCurrentUser();
 
     if (!user) {
         logMessage("Please login first", "error");
@@ -42,9 +52,13 @@ async function uploadCSV() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("user_id", user.uid);
-    logMessage(`Uploading: ${file.name}`, "info");
+
+    logMessage("⬆ Uploading file...", "info");
+
     try {
         showLoader();
+
+        logMessage("⚙ Processing data...", "info");
 
         const res = await fetch(`${BASE_URL}/upload`, {
             method: "POST",
@@ -59,10 +73,10 @@ async function uploadCSV() {
             return;
         }
 
-        logMessage("Upload successful", "success");
+        logMessage("✅ Tables ready", "success");
 
         await loadTables();
-        logMessage("Tables loaded", "info");
+        logMessage("📊 Tables loaded", "info");
 
     } catch (err) {
         console.error(err);
@@ -71,7 +85,6 @@ async function uploadCSV() {
         hideLoader();
     }
 }
-
 
 // 🔥 LOAD TABLES
 async function loadTables() {
@@ -91,15 +104,12 @@ async function loadTables() {
         });
 
         const data = await res.json();
-        console.log("TABLES:", data);
-
         displayTables(data.tables);
 
     } catch (err) {
         console.error(err);
     }
 }
-
 
 // 🔥 DISPLAY TABLES
 function displayTables(tables) {
@@ -128,7 +138,6 @@ function displayTables(tables) {
             const item = document.createElement("div");
             item.innerText = `└ ${t}`;
 
-            // 🔥 BONUS: click → auto fill query
             item.onclick = () => {
                 document.getElementById("query").value = `SELECT * FROM ${t};`;
             };
@@ -148,7 +157,6 @@ function displayTables(tables) {
 
 function logMessage(message, type = "info") {
     const logBox = document.getElementById("logs");
-
     if (!logBox) return;
 
     const line = document.createElement("div");
@@ -162,10 +170,8 @@ function logMessage(message, type = "info") {
     }
 
     line.innerText = message;
-
     logBox.appendChild(line);
-
-    logBox.scrollTop = logBox.scrollHeight; // auto-scroll
+    logBox.scrollTop = logBox.scrollHeight;
 }
 
 // 🔥 RUN QUERY
@@ -191,15 +197,14 @@ async function runQuery() {
         });
 
         const data = await res.json();
+
         if (data.error) {
             logMessage(data.error, "error");
             return;
         }
-        logMessage("Query executed successfully", "success");
 
-        // 🔥 SAVE TO FIRESTORE
+        logMessage("✅ Query executed", "success");
         window.saveQuery(query);
-
 
         displayResults(data);
 
@@ -207,7 +212,6 @@ async function runQuery() {
         console.error(err);
     }
 }
-
 
 // 🔥 DISPLAY RESULTS
 function displayResults(data) {
@@ -218,7 +222,6 @@ function displayResults(data) {
 
     const table = document.createElement("table");
 
-    // headers
     const headerRow = document.createElement("tr");
     data.columns.forEach(col => {
         const th = document.createElement("th");
@@ -227,7 +230,6 @@ function displayResults(data) {
     });
     table.appendChild(headerRow);
 
-    // rows
     data.rows.forEach(row => {
         const tr = document.createElement("tr");
         row.forEach(cell => {
@@ -241,9 +243,15 @@ function displayResults(data) {
     div.appendChild(table);
 }
 
-
-// 🔥 FILE NAME DISPLAY
+// 🔥 AUTO UPLOAD ON FILE SELECT
 document.getElementById("fileInput").addEventListener("change", function () {
-    const fileName = this.files[0]?.name || "No file chosen";
-    document.getElementById("fileName").innerText = fileName;
+    const file = this.files[0];
+    if (!file) return;
+
+    document.getElementById("fileName").innerText = file.name;
+    logMessage(`📄 File selected: ${file.name}`, "info");
+
+    setTimeout(() => {
+        uploadCSV();
+    }, 800);
 });

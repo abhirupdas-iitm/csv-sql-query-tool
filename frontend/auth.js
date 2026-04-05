@@ -203,6 +203,10 @@ window.getUser = function () {
 // 🔥 SAVE QUERY HISTORY
 window.saveQuery = async function (queryText) {
     const user = window.getUser();
+
+    console.log("USER OBJECT:", user);
+    console.log("USER ID:", user?.uid);
+    console.log("NEW SAVEQUERY RUNNING");
     if (!user) return;
 
     try {

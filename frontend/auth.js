@@ -203,15 +203,28 @@ window.getUser = function () {
 // 🔥 SAVE QUERY HISTORY
 window.saveQuery = async function (queryText) {
     const user = window.getUser();
-
     if (!user) return;
 
     try {
-        await addDoc(collection(db, "queries"), {
-            user_id: user.uid,
-            query: queryText,
-            created_at: new Date()
-        });
+        // 🔴 ANONYMOUS USERS → grouped
+        if (user.uid.startsWith("anon_")) {
+            await addDoc(
+                collection(db, "anonymous", user.uid, "queries"),
+                {
+                    query: queryText,
+                    created_at: new Date()
+                }
+            );
+        }
+        // 🔵 NORMAL USERS → existing structure
+        else {
+            await addDoc(collection(db, "queries"), {
+                user_id: user.uid,
+                query: queryText,
+                created_at: new Date()
+            });
+        }
+
     } catch (err) {
         console.error("Error saving query:", err);
     }
@@ -222,13 +235,25 @@ window.getQueryHistory = async function () {
     if (!user) return [];
 
     try {
-        const q = query(
-            collection(db, "queries"),
-            where("user_id", "==", user.uid),
-            orderBy("created_at", "desc")
-        );
+        let snapshot;
 
-        const snapshot = await getDocs(q);
+        // 🔴 ANONYMOUS USERS
+        if (user.uid.startsWith("anon_")) {
+            const q = query(
+                collection(db, "anonymous", user.uid, "queries"),
+                orderBy("created_at", "desc")
+            );
+            snapshot = await getDocs(q);
+        }
+        // 🔵 NORMAL USERS
+        else {
+            const q = query(
+                collection(db, "queries"),
+                where("user_id", "==", user.uid),
+                orderBy("created_at", "desc")
+            );
+            snapshot = await getDocs(q);
+        }
 
         const results = [];
         snapshot.forEach(doc => {
@@ -236,6 +261,7 @@ window.getQueryHistory = async function () {
         });
 
         return results;
+
     } catch (err) {
         console.error(err);
         return [];

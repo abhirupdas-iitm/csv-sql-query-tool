@@ -135,9 +135,7 @@ h3 {
 
 /* TOP ROW */
 .top-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    display: block;
 }
 
 /* PANELS */
@@ -371,4 +369,10 @@ button:hover {
 
 .divider:hover {
     background: var(--accent-green-bright);
+}
+
+.resizable-container {
+    width: 100%;
+    display: flex;
+    gap: 0;
 }

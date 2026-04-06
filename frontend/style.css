@@ -407,17 +407,27 @@ button:hover {
 /* 🔥 HISTORY ITEMS */
 .history-item {
     border-bottom: 1px solid #1e293b;
-    padding: 8px;
+    padding: 10px 8px;
     cursor: pointer;
+    transition: background 0.2s;
 }
 
 .history-item:hover {
     background: rgba(0, 255, 127, 0.1);
 }
 
+.history-index {
+    color: var(--accent-green-bright);
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
 .history-query {
     color: var(--accent-green);
     font-size: 12px;
+    word-break: break-word;
+    margin-bottom: 3px;
 }
 
 .history-time {
@@ -452,6 +462,7 @@ button:hover {
     padding: 15px;
     transition: left 0.3s ease;
     z-index: 999;
+    padding-top: 60px;
 }
 
 /* 🔥 WHEN ACTIVE */
@@ -463,4 +474,23 @@ button:hover {
 .main-content {
     flex: 1;
     width: 100%;
+}
+
+.sidebar h3 {
+    margin-top: 20px;
+    padding-left: 10px;
+}
+
+/* 🔥 FADE SYSTEM */
+body {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+body.fade-in {
+    opacity: 1;
+}
+
+body.fade-out {
+    opacity: 0;
 }

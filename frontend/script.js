@@ -217,10 +217,13 @@ async function runQuery() {
     }
 
     logMessage("Query executed", "success");
-    window.saveQuery(query);
-
     displayResults(data);
-    loadHistory();
+
+    // Save query then reload history after Firestore has time to persist
+    await window.saveQuery(query);
+    setTimeout(() => {
+        loadHistory();
+    }, 500);
 }
 
 // 🔥 RESULTS
@@ -258,23 +261,49 @@ async function loadHistory() {
     const historyDiv = document.getElementById("historyList");
     if (!historyDiv) return;
 
-    const queries = await window.getQueryHistory();
+    try {
+        const queries = await window.getQueryHistory();
 
-    historyDiv.innerHTML = "";
+        if (!queries || queries.length === 0) {
+            historyDiv.innerHTML = "<div style='color:#888; padding:10px;'>No queries yet...</div>";
+            return;
+        }
 
-    queries.forEach(q => {
-        const item = document.createElement("div");
-        item.className = "history-item";
+        historyDiv.innerHTML = "";
 
-        item.innerHTML = `
-            <div class="history-query">${q.query}</div>
-            <div class="history-time">${new Date(q.created_at.seconds * 1000).toLocaleString()}</div>
-        `;
+        queries.forEach((q, index) => {
+            const item = document.createElement("div");
+            item.className = "history-item";
 
-        item.onclick = () => {
-            document.getElementById("query").value = q.query;
-        };
+            // Parse date safely (handles Firestore Timestamp and regular Date)
+            let dateStr = "";
+            if (q.created_at) {
+                if (q.created_at.seconds) {
+                    dateStr = new Date(q.created_at.seconds * 1000).toLocaleString();
+                } else if (q.created_at.toDate) {
+                    dateStr = q.created_at.toDate().toLocaleString();
+                } else {
+                    dateStr = new Date(q.created_at).toLocaleString();
+                }
+            }
 
-        historyDiv.appendChild(item);
-    });
+            item.innerHTML = `
+                <div class="history-index">#${index + 1}</div>
+                <div class="history-query">${q.query}</div>
+                <div class="history-time">${dateStr}</div>
+            `;
+
+            item.onclick = () => {
+                document.getElementById("query").value = q.query;
+            };
+
+            historyDiv.appendChild(item);
+        });
+    } catch (err) {
+        console.error("Error loading history:", err);
+        historyDiv.innerHTML = "<div style='color:#ff4d4d; padding:10px;'>Failed to load history</div>";
+    }
 }
+
+// 🔥 EXPOSE loadHistory globally so auth.js can call it
+window.loadHistory = loadHistory;

@@ -21,6 +21,14 @@ import {
     orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+// 🔥 FADE NAVIGATION HELPER (ADDED)
+function fadeAndRedirect(url) {
+    document.body.classList.add("fade-out");
+    setTimeout(() => {
+        window.location.href = url;
+    }, 400);
+}
+
 // Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDfqzhtRbh25ITYaTN9W0kA9VHfvj1rG5Y",
@@ -88,20 +96,18 @@ window.useAnonymous = function () {
 
     if (!confirmMsg) return;
 
-    // 🔥 generate random ID
     const anonId = "anon_" + Math.random().toString(36).substring(2, 10);
 
     localStorage.setItem("anon_id", anonId);
 
-    // redirect to main app
-    window.location.href = "index.html";
+    fadeAndRedirect("index.html"); // 🔥 UPDATED
 };
 
 // 🔥 LOGOUT
 window.logout = async function () {
     await signOut(auth);
     localStorage.removeItem("anon_id");
-    window.location.href = "login.html";
+    fadeAndRedirect("login.html"); // 🔥 UPDATED
 };
 
 window.googleLogin = async function () {
@@ -136,20 +142,19 @@ onAuthStateChanged(auth, (user) => {
         const logoutBtn = document.querySelector('button[onclick="logout()"]');
         const authBar = document.querySelector(".auth-bar");
 
-        // 🔥 HIDE unnecessary stuff
         if (emailInput) emailInput.style.display = "none";
         if (passwordInput) passwordInput.style.display = "none";
         if (signupBtn) signupBtn.style.display = "none";
         if (loginBtn) loginBtn.style.display = "none";
 
-        // 🔥 CENTER remaining buttons
         if (authBar) {
             authBar.style.justifyContent = "center";
         }
+
         currentUser = user;
 
         if (window.location.pathname.includes("login.html")) {
-            window.location.href = "index.html";
+            fadeAndRedirect("index.html"); // 🔥 UPDATED
             return;
         }
 
@@ -162,9 +167,16 @@ onAuthStateChanged(auth, (user) => {
             pic.src = user.photoURL || "";
         }
 
-        // 🔥 SHOW APP AFTER AUTH CHECK
         if (loader) loader.classList.add("hidden");
         if (app) app.classList.remove("hidden");
+
+        const pollHistory1 = setInterval(() => {
+            if (window.loadHistory) {
+                clearInterval(pollHistory1);
+                window.loadHistory();
+            }
+        }, 100);
+        setTimeout(() => clearInterval(pollHistory1), 5000);
 
         return;
     }
@@ -174,7 +186,7 @@ onAuthStateChanged(auth, (user) => {
         currentUser = { uid: anonId };
 
         if (window.location.pathname.includes("login.html")) {
-            window.location.href = "index.html";
+            fadeAndRedirect("index.html"); // 🔥 UPDATED
             return;
         }
 
@@ -182,17 +194,25 @@ onAuthStateChanged(auth, (user) => {
             status.innerText = "Anonymous User";
         }
 
-        // 🔥 SHOW APP
         if (loader) loader.classList.add("hidden");
         if (app) app.classList.remove("hidden");
+
+        const pollHistory2 = setInterval(() => {
+            if (window.loadHistory) {
+                clearInterval(pollHistory2);
+                window.loadHistory();
+            }
+        }, 100);
+        setTimeout(() => clearInterval(pollHistory2), 5000);
 
         return;
     }
 
     // ❌ NOT LOGGED IN
     if (!window.location.pathname.includes("login.html")) {
-        window.location.href = "login.html";
+        fadeAndRedirect("login.html"); // 🔥 UPDATED
     }
+
 });
 
 // 🔥 EXPORT USER
@@ -207,10 +227,10 @@ window.saveQuery = async function (queryText) {
     console.log("USER OBJECT:", user);
     console.log("USER ID:", user?.uid);
     console.log("NEW SAVEQUERY RUNNING");
+
     if (!user) return;
 
     try {
-        // 🔴 ANONYMOUS USERS → grouped
         if (user.uid.startsWith("anon_")) {
             await addDoc(
                 collection(db, "anonymous", user.uid, "queries"),
@@ -219,9 +239,7 @@ window.saveQuery = async function (queryText) {
                     created_at: new Date()
                 }
             );
-        }
-        // 🔵 NORMAL USERS → existing structure
-        else {
+        } else {
             await addDoc(collection(db, "queries"), {
                 user_id: user.uid,
                 query: queryText,
@@ -236,27 +254,41 @@ window.saveQuery = async function (queryText) {
 
 window.getQueryHistory = async function () {
     const user = window.getUser();
-    if (!user) return [];
+    if (!user) {
+        console.warn("getQueryHistory: no user");
+        return [];
+    }
+
+    console.log("getQueryHistory: fetching for user", user.uid);
 
     try {
         let snapshot;
 
-        // 🔴 ANONYMOUS USERS
         if (user.uid.startsWith("anon_")) {
-            const q = query(
-                collection(db, "anonymous", user.uid, "queries"),
-                orderBy("created_at", "desc")
-            );
-            snapshot = await getDocs(q);
-        }
-        // 🔵 NORMAL USERS
-        else {
-            const q = query(
-                collection(db, "queries"),
-                where("user_id", "==", user.uid),
-                orderBy("created_at", "desc")
-            );
-            snapshot = await getDocs(q);
+            try {
+                const q = query(
+                    collection(db, "anonymous", user.uid, "queries"),
+                    orderBy("created_at", "desc")
+                );
+                snapshot = await getDocs(q);
+            } catch (indexErr) {
+                snapshot = await getDocs(collection(db, "anonymous", user.uid, "queries"));
+            }
+        } else {
+            try {
+                const q = query(
+                    collection(db, "queries"),
+                    where("user_id", "==", user.uid),
+                    orderBy("created_at", "desc")
+                );
+                snapshot = await getDocs(q);
+            } catch (indexErr) {
+                const q = query(
+                    collection(db, "queries"),
+                    where("user_id", "==", user.uid)
+                );
+                snapshot = await getDocs(q);
+            }
         }
 
         const results = [];
@@ -264,10 +296,16 @@ window.getQueryHistory = async function () {
             results.push(doc.data());
         });
 
+        results.sort((a, b) => {
+            const timeA = a.created_at?.seconds || 0;
+            const timeB = b.created_at?.seconds || 0;
+            return timeB - timeA;
+        });
+
         return results;
 
     } catch (err) {
-        console.error(err);
+        console.error("getQueryHistory FAILED:", err);
         return [];
     }
 };

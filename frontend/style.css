@@ -102,6 +102,7 @@ h3 {
     flex-wrap: wrap;
     gap: 20px;
     padding: 20px;
+    align-items: flex-start;
 }
 
 /* SHEET BLOCK */

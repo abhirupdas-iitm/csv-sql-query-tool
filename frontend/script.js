@@ -195,7 +195,19 @@ function displayTables(tables) {
             tablesDiv.appendChild(item);
         });
 
-        title.onclick = () => sheetDiv.classList.toggle("active");
+        title.onclick = () => {
+            const isActive = sheetDiv.classList.contains("active");
+
+            // 🔥 CLOSE ALL SHEETS FIRST
+            document.querySelectorAll(".sheet").forEach(s => {
+                s.classList.remove("active");
+            });
+
+            // 🔥 OPEN ONLY IF IT WAS NOT ACTIVE
+            if (!isActive) {
+                sheetDiv.classList.add("active");
+            }
+        };
 
         sheetDiv.appendChild(title);
         sheetDiv.appendChild(tablesDiv);

@@ -9,7 +9,14 @@ window.addEventListener("load", async () => {
         console.log("Pre-warm failed (safe to ignore)");
     }
 });
+// 🔥 NAME CONVERSION HELPERS
+function displayName(name) {
+    return name.replace(/__/g, "-");
+}
 
+function dbName(name) {
+    return name.replace(/-/g, "__");
+}
 // 🔥 INIT AFTER DOM LOAD
 window.addEventListener("DOMContentLoaded", () => {
 
@@ -181,9 +188,9 @@ function displayTables(tables) {
 
         grouped[sheet].forEach(t => {
             const item = document.createElement("div");
-            item.innerText = `└ ${t}`;
+            item.innerText = `└ ${displayName(t)}`;
             item.onclick = () => {
-                document.getElementById("query").value = `SELECT * FROM ${t};`;
+                document.getElementById("query").value = `SELECT * FROM ${displayName(t)};`;
             };
             tablesDiv.appendChild(item);
         });
@@ -199,7 +206,12 @@ function displayTables(tables) {
 // 🔥 RUN QUERY
 async function runQuery() {
     const user = getCurrentUser();
-    const query = document.getElementById("query").value;
+    let query = document.getElementById("query").value;
+
+    // 🔥 convert user-friendly names back to DB names
+    query = query.replace(/([a-zA-Z0-9]+-[a-zA-Z0-9]+)/g, (match) => {
+        return dbName(match);
+    });
 
     if (!user) return;
 

@@ -1,14 +1,4 @@
-const BASE_URL = "https://sheetql-backend.onrender.com";
-
-// 🔥 PRE-WARM BACKEND
-window.addEventListener("load", async () => {
-    try {
-        await fetch(`${BASE_URL}/`);
-        console.log("Backend warmed up");
-    } catch {
-        console.log("Pre-warm failed (safe to ignore)");
-    }
-});
+// 🦆 DuckDB is fully client-side — no backend needed for upload/query
 // 🔥 NAME CONVERSION HELPERS
 function displayName(name) {
     return name.replace(/__/g, "-");
@@ -106,7 +96,7 @@ function logMessage(message, type = "info") {
     logBox.scrollTop = logBox.scrollHeight;
 }
 
-// 🔥 UPLOAD
+// 🔥 UPLOAD — now fully client-side via DuckDB WASM
 async function uploadCSV() {
     const fileInput = document.getElementById("fileInput");
     const file = fileInput.files[0];
@@ -116,51 +106,37 @@ async function uploadCSV() {
     const user = getCurrentUser();
     if (!user) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("user_id", user.uid);
-
-    logMessage("⬆ Uploading file...", "info");
+    logMessage("⬆ Loading file into DuckDB...", "info");
 
     try {
         showLoader();
 
-        const res = await fetch(`${BASE_URL}/upload`, {
-            method: "POST",
-            body: formData
-        });
+        // Make sure DuckDB is ready
+        await window.duckDB.initDB();
 
-        const data = await res.json();
+        // Load the CSV file into DuckDB (returns table name)
+        const tableName = await window.duckDB.loadCSVFile(file);
 
-        if (data.error) {
-            logMessage(data.error, "error");
-            return;
-        }
-
-        logMessage("Tables ready", "success");
+        logMessage(`✅ Loaded as table: ${tableName}`, "success");
         await loadTables();
 
     } catch (err) {
         console.error(err);
-        logMessage("Upload failed", "error");
+        logMessage("❌ Upload failed: " + err.message, "error");
     } finally {
         hideLoader();
     }
 }
 
-// 🔥 LOAD TABLES
+// 🔥 LOAD TABLES — reads from DuckDB in-memory, no backend
 async function loadTables() {
-    const user = getCurrentUser();
-    if (!user) return;
-
-    const res = await fetch(`${BASE_URL}/tables`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: user.uid })
-    });
-
-    const data = await res.json();
-    displayTables(data.tables);
+    try {
+        const tables = await window.duckDB.listTables();
+        displayTables(tables);
+    } catch (err) {
+        console.error("loadTables error:", err);
+        logMessage("❌ Could not list tables: " + err.message, "error");
+    }
 }
 
 // 🔥 DISPLAY TABLES
@@ -215,39 +191,32 @@ function displayTables(tables) {
     }
 }
 
-// 🔥 RUN QUERY
+// 🔥 RUN QUERY — fully client-side via DuckDB WASM
 async function runQuery() {
     const user = getCurrentUser();
-    let query = document.getElementById("query").value;
-
-    // 🔥 convert user-friendly names back to DB names
-    query = query.replace(/([a-zA-Z0-9]+-[a-zA-Z0-9]+)/g, (match) => {
-        return dbName(match);
-    });
-
     if (!user) return;
 
-    const res = await fetch(`${BASE_URL}/query`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: user.uid, query })
-    });
+    let sql = document.getElementById("query").value.trim();
+    if (!sql) return;
 
-    const data = await res.json();
+    logMessage("⚡ Running query...", "info");
 
-    if (data.error) {
-        logMessage(data.error, "error");
-        return;
+    try {
+        const data = await window.duckDB.queryDB(sql);
+
+        logMessage("✅ Query executed", "success");
+        displayResults(data);
+
+        // Save query then reload history after Firestore has time to persist
+        await window.saveQuery(sql);
+        setTimeout(() => {
+            loadHistory();
+        }, 500);
+
+    } catch (err) {
+        console.error(err);
+        logMessage("❌ Query error: " + err.message, "error");
     }
-
-    logMessage("Query executed", "success");
-    displayResults(data);
-
-    // Save query then reload history after Firestore has time to persist
-    await window.saveQuery(query);
-    setTimeout(() => {
-        loadHistory();
-    }, 500);
 }
 
 // 🔥 RESULTS
@@ -255,7 +224,10 @@ function displayResults(data) {
     const div = document.getElementById("result");
     div.innerHTML = "";
 
-    if (!data.rows) return;
+    if (!data.rows || data.rows.length === 0) {
+        div.innerHTML = "<p style='color:#888; padding:10px;'>No results.</p>";
+        return;
+    }
 
     const table = document.createElement("table");
 
@@ -271,7 +243,7 @@ function displayResults(data) {
         const tr = document.createElement("tr");
         row.forEach(cell => {
             const td = document.createElement("td");
-            td.innerText = cell;
+            td.innerText = cell ?? "";
             tr.appendChild(td);
         });
         table.appendChild(tr);

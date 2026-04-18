@@ -495,3 +495,83 @@ body.fade-in {
 body.fade-out {
     opacity: 0;
 }
+
+/* 🔥 EDIT & DOWNLOAD ICONS */
+.action-icon {
+    cursor: pointer;
+    margin-left: 8px;
+    font-size: 14px;
+    opacity: 0.7;
+    transition: 0.2s;
+}
+
+.action-icon:hover {
+    opacity: 1;
+    color: white;
+}
+
+/* INLINE RENAME INPUT */
+.rename-input {
+    background: #222;
+    color: var(--accent-green-bright);
+    border: 1px solid var(--accent-green);
+    padding: 2px 5px;
+    font-family: inherit;
+    font-size: inherit;
+    outline: none;
+    width: 60%;
+}
+
+/* 🔥 MODAL */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: #111;
+    border: 2px solid var(--accent-green);
+    border-radius: 8px;
+    width: 90%;
+    height: 90%;
+    padding: 20px;
+    position: relative;
+    overflow: auto;
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 30px;
+    color: var(--danger-red);
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: white;
+}
+
+/* MERMAID CONTAINER */
+#erDiagramContainer {
+    width: 100%;
+    height: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white; /* ER diagrams usually look better on light bg, or we can configure mermaid */
+    border-radius: 4px;
+    overflow: auto;
+}

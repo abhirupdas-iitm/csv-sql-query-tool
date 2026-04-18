@@ -58,6 +58,9 @@
                     <button class="custom-file-upload" id="chooseFileBtn">
                         Choose File
                     </button>
+                    <button id="viewERDiagramBtn" class="custom-file-upload hidden" onclick="showERDiagram()">
+                        View ER Diagram
+                    </button>
                     <input type="file" id="fileInput" hidden>
                     <span id="fileName">No file chosen</span>
                 </div>
@@ -97,10 +100,23 @@
             </div>
         </div>
 
+        <!-- DATALIST FOR AUTOCOMPLETE -->
+        <datalist id="dbNamesList"></datalist>
+
+        <!-- ER DIAGRAM MODAL -->
+        <div id="erModal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeERDiagram()">&times;</span>
+                <h2 style="color: var(--accent-green-bright); text-align: center;">Entity-Relationship Diagram</h2>
+                <div id="erDiagramContainer" class="mermaid"></div>
+            </div>
+        </div>
+
         <!-- 🦆 DuckDB Dynamic script -->
         <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
         <script src="duckdb.js?v=10"></script>
-        <script src="script.js?v=10"></script>
+        <script src="script.js?v=11"></script>
         <script type="module" src="auth.js?v=10"></script>
 
         <script>

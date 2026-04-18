@@ -514,20 +514,27 @@ window.showERDiagram = async () => {
             return;
         }
         
-        let mermaidStr = "erDiagram\n";
+        let mermaidStr = "graph TD\n";
+        mermaidStr += "classDef entity fill:#29b6f6,stroke:#fff,stroke-width:2px,color:#000;\n";
+        mermaidStr += "classDef attr fill:#556b2f,stroke:#fff,stroke-width:2px,color:#fff;\n";
+        mermaidStr += "classDef rel fill:#800020,stroke:#fff,stroke-width:2px,color:#fff;\n\n";
+
         let allCols = {}; 
         
         for (const t of tables) {
             const schema = await window.duckDB.queryDB(`DESCRIBE "${t}"`);
             allCols[t] = schema.rows.map(r => r[0].toLowerCase());
             
-            mermaidStr += `  "${t}" {\n`;
+            const tId = "ENT_" + t.replace(/[^a-zA-Z0-9]/g, "");
+            mermaidStr += `  ${tId}["${t}"]:::entity\n`;
+            
             for(let row of schema.rows) {
                 const colName = row[0];
-                let colType = row[1];
-                mermaidStr += `    ${colType} ${colName.replace(/[\s"'-]+/g, "_")} \n`;
+                const cId = tId + "_ATTR_" + colName.replace(/[^a-zA-Z0-9]/g, "");
+                mermaidStr += `  ${cId}(["${colName}"]):::attr\n`;
+                mermaidStr += `  ${tId} --- ${cId}\n`;
             }
-            mermaidStr += `  }\n`;
+            mermaidStr += "\n";
         }
         
         // Basic heuristic for relations
@@ -540,6 +547,7 @@ window.showERDiagram = async () => {
             }
         }
         
+        let relCounter = 0;
         for (const key of possibleKeys) {
             let tablesWithKey = [];
             for (const t in allCols) {
@@ -547,8 +555,11 @@ window.showERDiagram = async () => {
             }
             // Draw lines if multiple tables share an ID-like column
             if (tablesWithKey.length > 1) {
-                for (let i = 0; i < tablesWithKey.length - 1; i++) {
-                    mermaidStr += `  "${tablesWithKey[i]}" ||--o{ "${tablesWithKey[i+1]}" : "shares_${key}"\n`;
+                const relId = "REL_" + relCounter++;
+                mermaidStr += `  ${relId}{"Shares ${key}"}:::rel\n`;
+                for (const t of tablesWithKey) {
+                    const tId = "ENT_" + t.replace(/[^a-zA-Z0-9]/g, "");
+                    mermaidStr += `  ${relId} --- ${tId}\n`;
                 }
             }
         }

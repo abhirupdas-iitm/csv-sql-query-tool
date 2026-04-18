@@ -74,6 +74,11 @@ async function loadCSVFile(file) {
             const sheetFileName = `${file.name}-${cleanSheet}.csv`;
             const sheetTableName = `${cleanSheet}-data`;
 
+            // Track file association
+            window.tableToFileMap = window.tableToFileMap || {};
+            const cleanFileName = file.name.replace(/\.[^.]+$/, "");
+            window.tableToFileMap[sheetTableName] = cleanFileName;
+
             await db.registerFileBuffer(sheetFileName, sheetBytes);
             await conn.query(`
                 CREATE OR REPLACE TABLE "${sheetTableName}" AS
@@ -92,6 +97,11 @@ async function loadCSVFile(file) {
         CREATE OR REPLACE TABLE "${tableName}" AS
         SELECT * FROM read_csv_auto('${filenameToRegister}', header=true, sample_size=-1)
     `);
+
+    // Track file association for default CSV uploads too
+    window.tableToFileMap = window.tableToFileMap || {};
+    const cleanFileName = file.name.replace(/\.[^.]+$/, "");
+    window.tableToFileMap[tableName] = cleanFileName;
 
     console.log(`🦆 Mapped "${file.name}" → table "${tableName}"`);
     return tableName;

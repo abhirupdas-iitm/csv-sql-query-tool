@@ -147,7 +147,20 @@ function displayTables(tables) {
     const container = document.getElementById("tables");
     container.innerHTML = "";
 
-    const grouped = { "Database Tables": tables };
+    const grouped = {};
+
+    tables.forEach(t => {
+        let parentName = "Database Tables";
+        if (window.tableToFileMap && window.tableToFileMap[t]) {
+            parentName = window.tableToFileMap[t];
+        } else {
+            // fallback if not in map
+            parentName = t;
+        }
+        
+        if (!grouped[parentName]) grouped[parentName] = [];
+        grouped[parentName].push(t);
+    });
 
     for (const sheet in grouped) {
         const sheetDiv = document.createElement("div");
@@ -196,10 +209,21 @@ async function runQuery() {
     let sql = document.getElementById("query").value.trim();
     if (!sql) return;
 
+    let runSql = sql;
+    // Auto-quote unquoted table names to prevent parse errors from hyphens without requiring the user to type quotes.
+    if (window.tableToFileMap) {
+        Object.keys(window.tableToFileMap).forEach(tableName => {
+            if (tableName.includes("-")) {
+                runSql = runSql.split(tableName).join(`"${tableName}"`);
+            }
+        });
+        runSql = runSql.replace(/""/g, '"'); // Cleanup in case they already quoted it
+    }
+
     logMessage("⚡ Running query...", "info");
 
     try {
-        const data = await window.duckDB.queryDB(sql);
+        const data = await window.duckDB.queryDB(runSql);
 
         logMessage("✅ Query executed", "success");
         displayResults(data);

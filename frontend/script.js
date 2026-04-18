@@ -147,17 +147,11 @@ function displayTables(tables) {
     const container = document.getElementById("tables");
     container.innerHTML = "";
 
-    const grouped = {};
-
-    tables.forEach(t => {
-        const [sheet] = t.split("__");
-        if (!grouped[sheet]) grouped[sheet] = [];
-        grouped[sheet].push(t);
-    });
+    const grouped = { "Database Tables": tables };
 
     for (const sheet in grouped) {
         const sheetDiv = document.createElement("div");
-        sheetDiv.className = "sheet";
+        sheetDiv.className = "sheet active";
 
         const title = document.createElement("div");
         title.innerHTML = `📁 ${sheet}`;
@@ -167,9 +161,9 @@ function displayTables(tables) {
 
         grouped[sheet].forEach(t => {
             const item = document.createElement("div");
-            item.innerText = `└ ${displayName(t)}`;
+            item.innerText = `└ ${t}`;
             item.onclick = () => {
-                document.getElementById("query").value = `SELECT * FROM ${displayName(t)};`;
+                document.getElementById("query").value = `SELECT * FROM ${t};`;
             };
             tablesDiv.appendChild(item);
         });

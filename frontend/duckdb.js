@@ -44,7 +44,9 @@ async function loadCSVFile(file) {
     
     const tableName = file.name
         .replace(/\.[^.]+$/, "")
-        .replace(/[^a-zA-Z0-9_]/g, "_");
+        .replace(/[^a-zA-Z0-9]/g, "_")
+        .replace(/_+/g, "_")
+        .toLowerCase();
 
     let bytes = new Uint8Array(await file.arrayBuffer());
     let filenameToRegister = file.name;
@@ -57,19 +59,31 @@ async function loadCSVFile(file) {
         // Read the excel file bytes
         const workbook = XLSX.read(bytes, { type: 'array' });
         
-        // Just take the first sheet
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
+        let loadedTables = [];
         
-        // Convert to CSV string!
-        const csvString = XLSX.utils.sheet_to_csv(worksheet);
+        for (const sheetName of workbook.SheetNames) {
+            const worksheet = workbook.Sheets[sheetName];
+            // Convert to CSV string!
+            const csvString = XLSX.utils.sheet_to_csv(worksheet);
+            
+            // Convert string back to bytes for DuckDB
+            const encoder = new TextEncoder();
+            const sheetBytes = encoder.encode(csvString);
+            
+            const cleanSheet = sheetName.replace(/[^a-zA-Z0-9]/g, "_").replace(/_+/g, "_").toLowerCase();
+            const sheetFileName = `${file.name}_${cleanSheet}.csv`;
+            const sheetTableName = `${cleanSheet}_data`;
+            
+            await db.registerFileBuffer(sheetFileName, sheetBytes);
+            await conn.query(`
+                CREATE OR REPLACE TABLE "${sheetTableName}" AS
+                SELECT * FROM read_csv_auto('${sheetFileName}', header=true, sample_size=-1)
+            `);
+            console.log(`🦆 Mapped "${file.name}" (Sheet: ${sheetName}) → table "${sheetTableName}"`);
+            loadedTables.push(sheetTableName);
+        }
         
-        // Convert string back to bytes for DuckDB
-        const encoder = new TextEncoder();
-        bytes = encoder.encode(csvString);
-        
-        // Pretend it was a CSV all along
-        filenameToRegister = file.name + ".csv";
+        return loadedTables.join(", ");
     }
 
     await db.registerFileBuffer(filenameToRegister, bytes);

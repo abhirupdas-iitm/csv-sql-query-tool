@@ -97,10 +97,11 @@
             </div>
         </div>
 
-        <!-- 🦆 DuckDB must load first (module, sets window.duckDB) -->
-        <script type="module" src="duckdb.js"></script>
-        <script src="script.js"></script>
-        <script type="module" src="auth.js"></script>
+        <!-- 🦆 DuckDB Dynamic script -->
+        <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+        <script src="duckdb.js?v=9"></script>
+        <script src="script.js?v=9"></script>
+        <script type="module" src="auth.js?v=9"></script>
 
         <script>
             document.getElementById("chooseFileBtn").addEventListener("click", () => {

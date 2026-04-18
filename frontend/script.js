@@ -111,10 +111,13 @@ async function uploadCSV() {
     try {
         showLoader();
 
-        // Make sure DuckDB is ready
+        // Wait for the duckdb.js module to finish loading (safety net for timing)
+        await window.duckDBReady;
+
+        // Initialise DuckDB engine (no-op if already done)
         await window.duckDB.initDB();
 
-        // Load the CSV file into DuckDB (returns table name)
+        // Load CSV into DuckDB — returns the table name
         const tableName = await window.duckDB.loadCSVFile(file);
 
         logMessage(`✅ Loaded as table: ${tableName}`, "success");

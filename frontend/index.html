@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>SheetQL</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -26,8 +27,16 @@
 
             <!-- 🔥 SIDEBAR -->
             <div class="sidebar" id="sidebar">
-                <h3>History</h3>
-                <div id="historyList">No queries yet...</div>
+                <div class="sidebar-tabs">
+                    <button class="tab-btn active" onclick="switchSidebarTab('history')">History</button>
+                    <button class="tab-btn" onclick="switchSidebarTab('saved')">Saved</button>
+                </div>
+                <div id="historyTab" class="sidebar-content">
+                    <div id="historyList">No queries yet...</div>
+                </div>
+                <div id="savedTab" class="sidebar-content hidden">
+                    <div id="savedList">No snippets saved yet...</div>
+                </div>
             </div>
 
             <!-- 🔥 MAIN CONTENT -->
@@ -51,6 +60,16 @@
                 <!-- HEADER -->
                 <div class="header">
                     <h1>SheetQL</h1>
+                    <div class="settings-trigger" onclick="toggleSettings()" title="Appearance Settings">🎨</div>
+                </div>
+                
+                <!-- SETTINGS PANEL -->
+                <div id="settingsPanel" class="panel settings-panel hidden">
+                    <h3>Personalization</h3>
+                    <div class="setting-item">
+                        <label>Accent Color</label>
+                        <input type="color" id="accentColor" value="#00e676" onchange="updateThemeColor(this.value)">
+                    </div>
                 </div>
 
                 <!-- UPLOAD -->
@@ -82,8 +101,17 @@
                             <div class="divider" id="divider"></div>
 
                             <div class="panel query-panel" id="queryPanel">
-                                <h3>SQL Query</h3>
-                                <textarea id="query"></textarea>
+                                <div class="query-header">
+                                    <h3>SQL Query</h3>
+                                    <div class="snippet-actions">
+                                        <input type="text" id="snippetName" placeholder="Name this snippet...">
+                                        <button onclick="saveSnippet()" title="Save as Snippet">💾 Save</button>
+                                    </div>
+                                </div>
+                                <div class="editor-container">
+                                    <pre id="editorOverlay" aria-hidden="true"><code class="language-sql"></code></pre>
+                                    <textarea id="query" spellcheck="false" oninput="syncEditor()"></textarea>
+                                </div>
                                 <button onclick="runQuery()">Run</button>
                             </div>
 
@@ -94,6 +122,12 @@
                         <div class="results-header">
                             <h3>Results <span id="queryMetadata" style="font-size: 12px; color: #888; margin-left:10px;"></span></h3>
                             <div class="results-actions">
+                                <select id="chartType" class="action-select hidden" onchange="renderChart()">
+                                    <option value="bar">Bar Chart</option>
+                                    <option value="line">Line Chart</option>
+                                    <option value="pie">Pie Chart</option>
+                                    <option value="radar">Radar Chart</option>
+                                </select>
                                 <button id="toggleChartBtn" onclick="toggleChartView()" class="action-btn hidden" title="Toggle between Table and Chart View">📊 Visualise</button>
                                 <button id="downloadResultBtn" onclick="downloadCurrentResult()" class="action-btn hidden" title="Download current results as CSV">📥 Download CSV</button>
                             </div>
@@ -124,11 +158,12 @@
         </div>
 
         <!-- 🦆 DuckDB Dynamic script -->
-        <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
         <script src="duckdb.js?v=10"></script>
-        <script src="script.js?v=12"></script>
+        <script src="script.js?v=13"></script>
         <script type="module" src="auth.js?v=10"></script>
 
         <script>

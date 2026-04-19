@@ -62,6 +62,16 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // 🔥 REFRESH SNIPPETS ON LOAD
+    setTimeout(window.loadSnippets, 2000);
+
+    // 🔥 INITIAL SYNC
+    window.syncEditor();
+    
+    // 🔥 LOAD THEME
+    const savedTheme = localStorage.getItem("sheetql_theme");
+    if(savedTheme) window.updateThemeColor(savedTheme);
+
 });
 
 // 🔥 USER HELPER
@@ -312,8 +322,10 @@ async function runQuery() {
         const isChartable = data.columns.length >= 2;
         if(isChartable) {
             document.getElementById("toggleChartBtn").classList.remove("hidden");
+            document.getElementById("chartType").classList.remove("hidden");
         } else {
             document.getElementById("toggleChartBtn").classList.add("hidden");
+            document.getElementById("chartType").classList.add("hidden");
         }
 
         displayResults(data);
@@ -678,37 +690,42 @@ function renderChart() {
 
     let values = data.rows.map(r => r[valueColIndex]);
     let label = data.columns[valueColIndex];
+    const chartType = document.getElementById("chartType").value || "bar";
+
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: chartType === 'pie' || chartType === 'radar' ? {} : {
+            y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                ticks: { color: '#fff' }
+            },
+            x: {
+                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                ticks: { color: '#fff' }
+            }
+        },
+        plugins: {
+            legend: { labels: { color: '#fff' }, position: chartType === 'pie' ? 'right' : 'top' }
+        }
+    };
 
     window.myChart = new Chart(ctx, {
-        type: 'bar',
+        type: chartType,
         data: {
             labels: labels,
             datasets: [{
                 label: label,
                 data: values,
-                backgroundColor: 'rgba(0, 230, 118, 0.6)',
+                backgroundColor: chartType === 'pie' ? 
+                    labels.map((_, i) => `hsla(${(i * 360) / labels.length}, 70%, 50%, 0.6)`) : 
+                    'rgba(0, 230, 118, 0.6)',
                 borderColor: '#00e676',
                 borderWidth: 1
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                    ticks: { color: '#fff' }
-                },
-                x: {
-                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                    ticks: { color: '#fff' }
-                }
-            },
-            plugins: {
-                legend: { labels: { color: '#fff' } }
-            }
-        }
+        options: commonOptions
     });
 }
 
@@ -789,4 +806,121 @@ const originalShowER = window.showERDiagram;
 window.showERDiagram = async () => {
     await originalShowER();
     setTimeout(initERInteractions, 500);
-};
+};
+
+// 🔥 PHASE 3 Features
+
+window.syncEditor = () => {
+    const query = document.getElementById("query");
+    const overlay = document.querySelector("#editorOverlay code");
+    if (!query || !overlay) return;
+
+    let content = query.value;
+    if (content[content.length - 1] === "\n") content += " ";
+    
+    overlay.textContent = content;
+    if (window.Prism) {
+        window.Prism.highlightElement(overlay);
+    }
+    
+    // Sync scroll
+    document.getElementById("editorOverlay").scrollTop = query.scrollTop;
+};
+
+// Hook scroll to sync highlighter
+window.addEventListener('load', () => {
+    const q = document.getElementById("query");
+    if(q) {
+        q.addEventListener('scroll', () => {
+            document.getElementById("editorOverlay").scrollTop = q.scrollTop;
+        });
+    }
+});
+
+window.switchSidebarTab = (tab) => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".sidebar-content").forEach(c => c.classList.add("hidden"));
+    
+    if (tab === 'history') {
+        document.querySelector(".tab-btn[onclick*='history']").classList.add("active");
+        document.getElementById("historyTab").classList.remove("hidden");
+    } else {
+        document.querySelector(".tab-btn[onclick*='saved']").classList.add("active");
+        document.getElementById("savedTab").classList.remove("hidden");
+        window.loadSnippets();
+    }
+};
+
+window.saveSnippet = async () => {
+    const nameInput = document.getElementById("snippetName");
+    const name = nameInput.value.trim();
+    const queryText = document.getElementById("query").value.trim();
+    
+    if (!name || !queryText) return logMessage("❌ Name and query are required!", "error");
+    
+    try {
+        showLoader();
+        await window.saveSnippet(name, queryText);
+        logMessage(`✅ Saved snippet: ${name}`, "success");
+        nameInput.value = "";
+        window.loadSnippets();
+    } catch (err) {
+        logMessage(`❌ Failed to save snippet: ${err.message}`, "error");
+    } finally {
+        hideLoader();
+    }
+};
+
+window.loadSnippets = async () => {
+    const container = document.getElementById("savedList");
+    if (!container) return;
+    
+    const snippets = await window.getSnippets();
+    if (!snippets || snippets.length === 0) {
+        container.innerHTML = "<div style='color:#888; padding:10px;'>No snippets saved yet...</div>";
+        return;
+    }
+    
+    container.innerHTML = "";
+    snippets.forEach(s => {
+        const item = document.createElement("div");
+        item.className = "history-item";
+        item.innerHTML = `
+            <div style="color:var(--accent-bright); font-weight:bold; font-size:12px;">${s.name}</div>
+            <div class="history-query">${s.query}</div>
+        `;
+        item.onclick = () => {
+            document.getElementById("query").value = s.query;
+            window.syncEditor();
+        };
+        container.appendChild(item);
+    });
+};
+
+window.toggleSettings = () => {
+    document.getElementById("settingsPanel").classList.toggle("hidden");
+};
+
+window.updateThemeColor = (color) => {
+    document.documentElement.style.setProperty('--accent', color);
+    
+    // Simple logic to generate a "bright" version (lighter)
+    const bright = hexToLighter(color, 20);
+    document.documentElement.style.setProperty('--accent-bright', bright);
+    
+    localStorage.setItem("sheetql_theme", color);
+    const picker = document.getElementById("accentColor");
+    if(picker) picker.value = color;
+};
+
+function hexToLighter(hex, percent) {
+    let r = parseInt(hex.slice(1, 3), 16);
+    let g = parseInt(hex.slice(3, 5), 16);
+    let b = parseInt(hex.slice(5, 7), 16);
+    
+    r = Math.min(255, Math.floor(r + (255 - r) * (percent / 100)));
+    g = Math.min(255, Math.floor(g + (255 - g) * (percent / 100)));
+    b = Math.min(255, Math.floor(b + (255 - b) * (percent / 100)));
+    
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}

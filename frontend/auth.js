@@ -309,3 +309,57 @@ window.getQueryHistory = async function () {
         return [];
     }
 };
+
+// 🔥 SAVE SNIPPET (NAMED QUERY)
+window.saveSnippet = async function (name, queryText) {
+    const user = window.getUser();
+    if (!user) return;
+
+    try {
+        if (user.uid.startsWith("anon_")) {
+            await addDoc(
+                collection(db, "anonymous", user.uid, "snippets"),
+                {
+                    name: name,
+                    query: queryText,
+                    created_at: new Date()
+                }
+            );
+        } else {
+            await addDoc(collection(db, "snippets"), {
+                user_id: user.uid,
+                name: name,
+                query: queryText,
+                created_at: new Date()
+            });
+        }
+    } catch (err) {
+        console.error("Error saving snippet:", err);
+        throw err;
+    }
+};
+
+window.getSnippets = async function () {
+    const user = window.getUser();
+    if (!user) return [];
+
+    try {
+        let snapshot;
+        if (user.uid.startsWith("anon_")) {
+            snapshot = await getDocs(collection(db, "anonymous", user.uid, "snippets"));
+        } else {
+            const q = query(
+                collection(db, "snippets"),
+                where("user_id", "==", user.uid)
+            );
+            snapshot = await getDocs(q);
+        }
+
+        const results = [];
+        snapshot.forEach(doc => results.push({ id: doc.id, ...doc.data() }));
+        return results;
+    } catch (err) {
+        console.error("getSnippets FAILED:", err);
+        return [];
+    }
+};

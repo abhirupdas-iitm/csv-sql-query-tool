@@ -10,6 +10,10 @@
     --text-dark: #0b1a2b;
 
     --danger-red: #ff3b3b;
+
+    /* Dynamic Accent Support */
+    --accent: var(--accent-green);
+    --accent-bright: var(--accent-green-bright);
 }
 
 /* GLOBAL */
@@ -33,16 +37,16 @@ h3 {
     gap: 10px;
     padding: 10px;
     background: var(--bg-main);
-    border-bottom: 1px solid var(--accent-green);
+    border-bottom: 1px solid var(--accent);
 }
 
 .auth-bar button {
-    border: 1px solid var(--accent-green);
-    color: var(--accent-green);
+    border: 1px solid var(--accent);
+    color: var(--accent);
 }
 
 #authStatus {
-    color: var(--accent-green-bright);
+    color: var(--accent-bright);
     margin-left: auto;
     margin-right: 10px;
 }
@@ -139,40 +143,90 @@ h3 {
     display: block;
 }
 
-/* PANELS */
-.panel {
-    background: black;
-    border: 2px solid var(--accent-green);
-    padding: 15px;
-    min-height: 200px;
+/* QUERY PANEL & EDITOR */
+.query-panel {
+    display: flex;
+    flex-direction: column;
 }
 
-/* PANEL HEADINGS */
-.panel h3 {
-    color: var(--accent-purple);
+.query-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
-/* QUERY */
-textarea {
+.snippet-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.snippet-actions input {
+    background: #222;
+    border: 1px solid #444;
+    color: white;
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    width: 150px;
+}
+
+.snippet-actions button {
+    font-size: 12px;
+    padding: 4px 10px;
+}
+
+.editor-container {
+    position: relative;
     width: 100%;
-    height: 120px;
-    resize: vertical;
-
-    background: black;
-    color: var(--accent-green);
-    border: 1px solid var(--accent-green);
-    font-family: monospace;
-    padding: 10px;
-
-    box-sizing: border-box;
-    /* 🔥 CRITICAL FIX */
-    max-width: 100%;
-    /* 🔥 prevents overflow */
+    height: 150px;
+    border: 1px solid var(--accent);
+    background: #000;
+    margin-bottom: 10px;
+    overflow: hidden;
 }
 
-/* RUN BUTTON */
+#editorOverlay, #query {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    box-sizing: border-box;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    tab-size: 4;
+    overflow-y: auto;
+}
+
+#editorOverlay {
+    pointer-events: none;
+    z-index: 1;
+    background: transparent;
+    border: none;
+    color: transparent;
+}
+
+#editorOverlay code {
+    background: transparent !important;
+}
+
+#query {
+    z-index: 2;
+    background: transparent;
+    color: transparent; /* Text is invisible so the overlay shows through */
+    caret-color: white; /* Make cursor visible */
+    border: none;
+    resize: none;
+}
+
 .query-panel button {
-    background: var(--accent-green);
+    background: var(--accent);
     color: var(--text-dark);
     border: none;
 }
@@ -390,14 +444,47 @@ button:hover {
 .sidebar {
     width: 260px;
     background: #000;
-    border-right: 2px solid var(--accent-green);
-    padding: 10px;
+    border-right: 2px solid var(--accent);
+    padding: 0; /* Changed for tabs */
     height: 100vh;
-    overflow-y: auto;
+    overflow-y: hidden;
+    position: fixed;
+    left: -300px;
+    transition: left 0.3s ease;
+    z-index: 999;
 }
 
-.sidebar h3 {
-    color: var(--accent-purple);
+.sidebar.active {
+    left: 0;
+}
+
+.sidebar-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--accent);
+    margin-top: 60px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #666;
+    padding: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    border-bottom: 2px solid transparent;
+    transition: 0.2s;
+}
+
+.tab-btn.active {
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+}
+
+.sidebar-content {
+    height: calc(100vh - 110px);
+    overflow-y: auto;
+    padding: 10px;
 }
 
 /* 🔥 MAIN CONTENT */
@@ -542,7 +629,7 @@ body.fade-out {
 
 .modal-content {
     background: #111;
-    border: 2px solid var(--accent-green);
+    border: 2px solid var(--accent);
     border-radius: 8px;
     width: 90%;
     height: 90%;
@@ -583,8 +670,8 @@ body.fade-out {
     font-size: 12px;
     padding: 4px 10px;
     background: rgba(0, 230, 118, 0.1);
-    border: 1px solid var(--accent-green);
-    color: var(--accent-green);
+    border: 1px solid var(--accent);
+    color: var(--accent);
     border-radius: 4px;
     transition: all 0.2s ease;
 }
@@ -654,4 +741,65 @@ body.fade-out {
 
 .zoom-btn:hover {
     background: #eee;
-}
+}
+
+/* SETTINGS & SELECTS */
+.settings-trigger {
+    cursor: pointer;
+    font-size: 20px;
+    opacity: 0.7;
+    transition: 0.2s;
+}
+
+.settings-trigger:hover {
+    opacity: 1;
+    transform: rotate(45deg);
+}
+
+.settings-panel {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    width: 250px;
+    z-index: 1500;
+    background: rgba(0,0,0,0.95);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    border: 1px solid var(--accent);
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.setting-item label {
+    font-size: 14px;
+    color: #ccc;
+}
+
+.action-select {
+    background: #222;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Apply dynamic variables to existing classes */
+.header h1 { color: var(--accent-bright); }
+.custom-file-upload { border-color: var(--accent); color: var(--accent); }
+.custom-file-upload:hover { background: var(--accent); }
+.divider { background: var(--accent); }
+.divider:hover { background: var(--accent-bright); }
+.sheet { border-color: var(--accent); color: var(--accent); }
+.panel { border-color: var(--accent); }
+.results-panel th { color: var(--accent); }
+.history-index { color: var(--accent-bright); }
+.history-query { color: var(--accent); }
+.rename-input { color: var(--accent-bright); border-color: var(--accent); }
+

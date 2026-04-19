@@ -7,6 +7,10 @@ function displayName(name) {
 function dbName(name) {
     return name.replace(/-/g, "__");
 }
+
+window.lastQueryResult = null;
+window.myChart = null;
+
 // 🔥 INIT AFTER DOM LOAD
 window.addEventListener("DOMContentLoaded", () => {
 
@@ -290,10 +294,38 @@ async function runQuery() {
     logMessage("⚡ Running query...", "info");
 
     try {
+        const startTime = performance.now();
         const data = await window.duckDB.queryDB(runSql);
+        const duration = (performance.now() - startTime).toFixed(1);
 
-        logMessage("✅ Query executed", "success");
+        window.lastQueryResult = data;
+
+        logMessage(`✅ Query executed in ${duration}ms`, "success");
+        
+        // Update metadata and show actions
+        const meta = document.getElementById("queryMetadata");
+        if(meta) meta.innerText = `(${data.rows.length} rows, ${duration}ms)`;
+        
+        document.getElementById("downloadResultBtn").classList.remove("hidden");
+        
+        // Detection for chart-ability
+        const isChartable = data.columns.length >= 2;
+        if(isChartable) {
+            document.getElementById("toggleChartBtn").classList.remove("hidden");
+        } else {
+            document.getElementById("toggleChartBtn").classList.add("hidden");
+        }
+
         displayResults(data);
+
+        // Reset chart if it exists
+        if(window.myChart) {
+            window.myChart.destroy();
+            window.myChart = null;
+            document.getElementById("resultChartContainer").classList.add("hidden");
+            document.getElementById("resultTableContainer").classList.remove("hidden");
+            document.getElementById("toggleChartBtn").innerText = "📊 Visualise";
+        }
 
         // Save query then reload history after Firestore has time to persist
         await window.saveQuery(sql);
@@ -304,6 +336,9 @@ async function runQuery() {
     } catch (err) {
         console.error(err);
         logMessage("❌ Query error: " + err.message, "error");
+        document.getElementById("downloadResultBtn").classList.add("hidden");
+        document.getElementById("toggleChartBtn").classList.add("hidden");
+        if(document.getElementById("queryMetadata")) document.getElementById("queryMetadata").innerText = "";
     }
 }
 
@@ -579,4 +614,179 @@ window.showERDiagram = async () => {
 
 window.closeERDiagram = () => {
     document.getElementById("erModal").classList.add("hidden");
+};
+
+// 🔥 PHASE 2: NEW FEATURES
+
+window.downloadCurrentResult = () => {
+    if(!window.lastQueryResult) return;
+    const data = window.lastQueryResult;
+    
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += data.columns.join(",") + "\r\n";
+    data.rows.forEach(row => {
+        let rowStr = row.map(v => {
+            if (v === null || v === undefined) return "";
+            const str = String(v);
+            return str.match(/[",\n]/) ? `"${str.replace(/"/g, '""')}"` : str;
+        }).join(",");
+        csvContent += rowStr + "\r\n";
+    });
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `query_results_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    logMessage("✅ Exported results to CSV", "success");
+};
+
+window.toggleChartView = () => {
+    const tableDiv = document.getElementById("resultTableContainer");
+    const chartDiv = document.getElementById("resultChartContainer");
+    const btn = document.getElementById("toggleChartBtn");
+
+    if (chartDiv.classList.contains("hidden")) {
+        tableDiv.classList.add("hidden");
+        chartDiv.classList.remove("hidden");
+        btn.innerText = "🔙 Show Table";
+        renderChart();
+    } else {
+        tableDiv.classList.remove("hidden");
+        chartDiv.classList.add("hidden");
+        btn.innerText = "📊 Visualise";
+    }
+};
+
+function renderChart() {
+    if(!window.lastQueryResult) return;
+    const data = window.lastQueryResult;
+    const ctx = document.getElementById('resultChart').getContext('2d');
+
+    if (window.myChart) {
+        window.myChart.destroy();
+    }
+
+    // Heuristic: labels from 1st col, values from 1st numeric col
+    let labels = data.rows.map(r => r[0]);
+    let valueColIndex = data.rows[0].findIndex((val, idx) => idx > 0 && typeof val === 'number');
+    
+    // Fallback if no numbers found in subsequent cols
+    if (valueColIndex === -1) valueColIndex = 1;
+
+    let values = data.rows.map(r => r[valueColIndex]);
+    let label = data.columns[valueColIndex];
+
+    window.myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: label,
+                data: values,
+                backgroundColor: 'rgba(0, 230, 118, 0.6)',
+                borderColor: '#00e676',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: '#fff' }
+                },
+                x: {
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: '#fff' }
+                }
+            },
+            plugins: {
+                legend: { labels: { color: '#fff' } }
+            }
+        }
+    });
+}
+
+// 🔥 ER DIAGRAM ZOOM & PAN LOGIC
+let zoomScale = 1;
+let isPanning = false;
+let startX, startY, scrollLeft, scrollTop;
+
+function initERInteractions() {
+    const container = document.getElementById("erDiagramContainer");
+    
+    // Zoom via Wheel
+    container.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        zoomScale = Math.min(Math.max(0.1, zoomScale + delta), 3);
+        applyERTransform();
+    });
+
+    // Pan via Mouse
+    container.addEventListener("mousedown", (e) => {
+        isPanning = true;
+        startX = e.pageX - container.offsetLeft;
+        startY = e.pageY - container.offsetTop;
+        scrollLeft = container.scrollLeft;
+        scrollTop = container.scrollTop;
+    });
+
+    container.addEventListener("mouseleave", () => { isPanning = false; });
+    container.addEventListener("mouseup", () => { isPanning = false; });
+
+    container.addEventListener("mousemove", (e) => {
+        if (!isPanning) return;
+        e.preventDefault();
+        const x = e.pageX - container.offsetLeft;
+        const y = e.pageY - container.offsetTop;
+        const walkX = (x - startX) * 2;
+        const walkY = (y - startY) * 2;
+        container.scrollLeft = scrollLeft - walkX;
+        container.scrollTop = scrollTop - walkY;
+    });
+
+    // Zoom Controls
+    if (!document.querySelector(".zoom-controls")) {
+        const controls = document.createElement("div");
+        controls.className = "zoom-controls";
+        controls.innerHTML = `
+            <div class="zoom-btn" onclick="adjustZoom(0.1)">+</div>
+            <div class="zoom-btn" onclick="adjustZoom(-0.1)">-</div>
+            <div class="zoom-btn" onclick="resetZoom()">↺</div>
+        `;
+        container.parentElement.appendChild(controls);
+    }
+}
+
+window.adjustZoom = (delta) => {
+    zoomScale = Math.min(Math.max(0.1, zoomScale + delta), 3);
+    applyERTransform();
+};
+
+window.resetZoom = () => {
+    zoomScale = 1;
+    applyERTransform();
+    const container = document.getElementById("erDiagramContainer");
+    container.scrollLeft = 0;
+    container.scrollTop = 0;
+};
+
+function applyERTransform() {
+    const mermaidEl = document.querySelector("#erDiagramContainer .mermaid");
+    if(mermaidEl) {
+        mermaidEl.style.transform = `scale(${zoomScale})`;
+    }
+}
+
+// Wrap showERDiagram to add interaction init
+const originalShowER = window.showERDiagram;
+window.showERDiagram = async () => {
+    await originalShowER();
+    setTimeout(initERInteractions, 500);
 };

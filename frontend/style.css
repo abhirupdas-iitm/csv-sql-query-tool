@@ -564,14 +564,94 @@ body.fade-out {
     color: white;
 }
 
-/* MERMAID CONTAINER */
+/* RESULTS INTERACTION */
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(0, 230, 118, 0.2);
+    padding-bottom: 8px;
+}
+
+.results-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    font-size: 12px;
+    padding: 4px 10px;
+    background: rgba(0, 230, 118, 0.1);
+    border: 1px solid var(--accent-green);
+    color: var(--accent-green);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background: var(--accent-green);
+    color: var(--text-dark);
+    box-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
+}
+
+#resultChartContainer {
+    width: 100%;
+    height: 350px;
+    background: #000;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* ER DIAGRAM ZOOM/PAN */
 #erDiagramContainer {
     width: 100%;
     height: 90%;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: white; /* ER diagrams usually look better on light bg, or we can configure mermaid */
+    background: #f8f9fa; 
     border-radius: 4px;
-    overflow: auto;
+    overflow: hidden; /* Changed to hidden for custom pan logic */
+    cursor: grab;
+    position: relative;
+}
+
+#erDiagramContainer:active {
+    cursor: grabbing;
+}
+
+#erDiagramContainer .mermaid {
+    transform-origin: center center;
+    transition: transform 0.1s ease-out;
+}
+
+.zoom-controls {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    z-index: 2100;
+}
+
+.zoom-btn {
+    width: 35px;
+    height: 35px;
+    background: white;
+    color: black;
+    border: 1px solid #ccc;
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.zoom-btn:hover {
+    background: #eee;
 }

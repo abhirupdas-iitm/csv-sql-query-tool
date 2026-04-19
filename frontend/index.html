@@ -59,8 +59,10 @@
 
                 <!-- HEADER -->
                 <div class="header">
-                    <h1>SheetQL</h1>
-                    <div class="settings-trigger" onclick="toggleSettings()" title="Appearance Settings">🎨</div>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <h1>SheetQL</h1>
+                        <button class="custom-file-upload" id="themeBtn" onclick="toggleSettings(); event.stopPropagation();">Choose Theme</button>
+                    </div>
                 </div>
                 
                 <!-- SETTINGS PANEL -->
@@ -158,13 +160,14 @@
         </div>
 
         <!-- 🦆 DuckDB Dynamic script -->
+        <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
-        <script src="duckdb.js?v=10"></script>
-        <script src="script.js?v=13"></script>
-        <script type="module" src="auth.js?v=10"></script>
+        <script src="duckdb.js?v=11"></script>
+        <script src="script.js?v=14"></script>
+        <script type="module" src="auth.js?v=11"></script>
 
         <script>
             document.getElementById("chooseFileBtn").addEventListener("click", () => {

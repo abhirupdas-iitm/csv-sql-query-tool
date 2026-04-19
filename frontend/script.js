@@ -901,6 +901,17 @@ window.toggleSettings = () => {
     document.getElementById("settingsPanel").classList.toggle("hidden");
 };
 
+// 🔥 CLICK OUTSIDE TO CLOSE SETTINGS
+document.addEventListener("click", (e) => {
+    const panel = document.getElementById("settingsPanel");
+    const btn = document.getElementById("themeBtn");
+    if (!panel || !btn) return;
+
+    if (!panel.contains(e.target) && e.target !== btn && !panel.classList.contains("hidden")) {
+        panel.classList.add("hidden");
+    }
+});
+
 window.updateThemeColor = (color) => {
     document.documentElement.style.setProperty('--accent', color);
     

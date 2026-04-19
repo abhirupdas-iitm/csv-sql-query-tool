@@ -12,8 +12,8 @@
     --danger-red: #ff3b3b;
 
     /* Dynamic Accent Support */
-    --accent: var(--accent-green);
-    --accent-bright: var(--accent-green-bright);
+    --accent: #00e676; /* Restore default to the proper green */
+    --accent-bright: #00f5a0;
 }
 
 /* GLOBAL */
@@ -43,6 +43,18 @@ h3 {
 .auth-bar button {
     border: 1px solid var(--accent);
     color: var(--accent);
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+}
+
+.auth-bar input {
+    background: #111;
+    border: 1px solid #333;
+    padding: 4px 8px;
+    color: white;
+    font-size: 12px;
+    border-radius: 4px;
 }
 
 #authStatus {
@@ -57,12 +69,14 @@ h3 {
 
 /* HEADER */
 .header {
-    padding: 10px 20px;
-    border-bottom: 1px solid #1e293b;
+    padding: 15px 25px;
+    border-bottom: 2px solid var(--accent);
+    background: rgba(0, 0, 0, 0.3);
 }
 
 .header h1 {
-    color: var(--accent-green-bright);
+    color: var(--accent-bright);
+    text-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
 }
 
 /* UPLOAD CENTER */
@@ -76,21 +90,21 @@ h3 {
 
 /* FILE BUTTON */
 .custom-file-upload {
-    border: 2px solid var(--accent-green);
+    border: 2px solid var(--accent);
     padding: 6px 14px;
     cursor: pointer;
     display: inline-block;
-    color: var(--accent-green);
+    color: var(--accent);
 }
 
 .custom-file-upload:hover {
-    background: var(--accent-green);
+    background: var(--accent);
     color: var(--text-dark);
 }
 
 /* UPLOAD BUTTON */
 .upload-center button {
-    background: var(--accent-green);
+    background: var(--accent);
     color: var(--text-dark);
     border: none;
 }
@@ -112,10 +126,10 @@ h3 {
 /* SHEET BLOCK */
 .sheet {
     background: #111;
-    border: 2px solid var(--accent-green);
+    border: 2px solid var(--accent);
     padding: 10px;
     min-width: 150px;
-    color: var(--accent-green);
+    color: var(--accent);
     cursor: pointer;
 }
 
@@ -162,18 +176,25 @@ h3 {
 }
 
 .snippet-actions input {
-    background: #222;
-    border: 1px solid #444;
+    background: #111;
+    border: 1px solid #333;
     color: white;
-    padding: 4px 8px;
-    font-size: 12px;
+    padding: 6px 10px;
+    font-size: 13px;
     border-radius: 4px;
-    width: 150px;
+    width: 180px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.snippet-actions input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 5px rgba(0, 230, 118, 0.2);
 }
 
 .snippet-actions button {
-    font-size: 12px;
-    padding: 4px 10px;
+    font-size: 13px;
+    padding: 6px 14px;
 }
 
 .editor-container {
@@ -193,48 +214,59 @@ h3 {
     width: 100%;
     height: 100%;
     margin: 0;
-    padding: 10px;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-    line-height: 1.5;
+    padding: 12px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 15px;
+    line-height: 1.6;
     box-sizing: border-box;
     white-space: pre-wrap;
     word-wrap: break-word;
     tab-size: 4;
     overflow-y: auto;
+    border: none;
+    outline: none;
 }
 
 #editorOverlay {
     pointer-events: none;
     z-index: 1;
     background: transparent;
-    border: none;
     color: transparent;
 }
 
 #editorOverlay code {
     background: transparent !important;
+    padding: 0 !important;
 }
 
 #query {
     z-index: 2;
     background: transparent;
-    color: transparent; /* Text is invisible so the overlay shows through */
-    caret-color: white; /* Make cursor visible */
-    border: none;
+    color: rgba(255, 255, 255, 0.4); /* Subtle text so highlighting pops but cursor is visible */
+    caret-color: var(--accent);
     resize: none;
 }
 
 .query-panel button {
+    margin-top: 10px;
     background: var(--accent);
     color: var(--text-dark);
+    font-weight: bold;
     border: none;
+    align-self: flex-end;
+    padding: 8px 25px;
+    border-radius: 4px;
+}
+
+.query-panel button:hover {
+    background: var(--accent-bright);
+    box-shadow: 0 0 15px var(--accent);
 }
 
 /* RESULTS */
 .results-panel {
     background: black;
-    border: 2px solid var(--accent-green);
+    border: 2px solid var(--accent);
     padding: 15px;
     height: 250px;
     overflow: auto;
@@ -246,7 +278,7 @@ h3 {
 }
 
 .results-panel th {
-    color: var(--accent-green);
+    color: var(--accent);
     border: 1px solid #334155;
     padding: 6px;
 }
@@ -265,15 +297,15 @@ h3 {
 /* BUTTONS GENERAL */
 button {
     background: transparent;
-    border: 2px solid var(--accent-green);
-    color: var(--accent-green);
+    border: 2px solid var(--accent);
+    color: var(--accent);
     padding: 6px 14px;
     cursor: pointer;
     transition: 0.2s;
 }
 
 button:hover {
-    background: var(--accent-green);
+    background: var(--accent);
     color: var(--text-dark);
 }
 
@@ -300,7 +332,7 @@ button:hover {
     width: 50px;
     height: 50px;
     border: 5px solid #1e293b;
-    border-top: 5px solid var(--accent-green);
+    border-top: 5px solid var(--accent);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -329,7 +361,7 @@ button:hover {
 }
 
 .login-title {
-    color: var(--accent-green-bright);
+    color: var(--accent-bright);
     font-size: 42px;
     font-weight: bold;
 }
@@ -345,7 +377,7 @@ button:hover {
     width: 220px;
     text-align: center;
     background: rgba(255, 255, 255, 0.08);
-    border: 1px solid var(--accent-green);
+    border: 1px solid var(--accent);
     color: white;
 }
 
@@ -356,7 +388,7 @@ button:hover {
 }
 
 .login-buttons button {
-    background: var(--accent-green);
+    background: var(--accent);
     color: var(--text-dark);
     border: none;
 }
@@ -389,7 +421,7 @@ button:hover {
 }
 
 .custom-file-upload {
-    background: var(--accent-green);
+    background: var(--accent);
     color: var(--text-dark);
     border: none;
     font-weight: bold;
@@ -421,12 +453,12 @@ button:hover {
 /* 🔥 DIVIDER */
 .divider {
     width: 6px;
-    background: var(--accent-green);
+    background: var(--accent);
     cursor: col-resize;
 }
 
 .divider:hover {
-    background: var(--accent-green-bright);
+    background: var(--accent-bright);
 }
 
 .resizable-container {
@@ -505,14 +537,14 @@ button:hover {
 }
 
 .history-index {
-    color: var(--accent-green-bright);
+    color: var(--accent-bright);
     font-size: 11px;
     font-weight: bold;
     margin-bottom: 2px;
 }
 
 .history-query {
-    color: var(--accent-green);
+    color: var(--accent);
     font-size: 12px;
     word-break: break-word;
     margin-bottom: 3px;
@@ -531,7 +563,7 @@ button:hover {
     justify-content: center;
     font-size: 22px;
     cursor: pointer;
-    color: var(--accent-green);
+    color: var(--accent);
     z-index: 1000;
     padding: 4px 8px;
     line-height: 1;
@@ -546,7 +578,7 @@ button:hover {
     width: 260px;
     height: 100vh;
     background: #000;
-    border-right: 2px solid var(--accent-green);
+    border-right: 2px solid var(--accent);
     padding: 15px;
     transition: left 0.3s ease;
     z-index: 999;
@@ -600,8 +632,8 @@ body.fade-out {
 /* INLINE RENAME INPUT */
 .rename-input {
     background: #222;
-    color: var(--accent-green-bright);
-    border: 1px solid var(--accent-green);
+    color: var(--accent-bright);
+    border: 1px solid var(--accent);
     padding: 2px 5px;
     font-family: inherit;
     font-size: inherit;
@@ -677,7 +709,7 @@ body.fade-out {
 }
 
 .action-btn:hover {
-    background: var(--accent-green);
+    background: var(--accent);
     color: var(--text-dark);
     box-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
 }
@@ -744,27 +776,22 @@ body.fade-out {
 }
 
 /* SETTINGS & SELECTS */
-.settings-trigger {
-    cursor: pointer;
-    font-size: 20px;
-    opacity: 0.7;
-    transition: 0.2s;
-}
-
-.settings-trigger:hover {
-    opacity: 1;
-    transform: rotate(45deg);
+#themeBtn {
+    font-size: 14px;
+    padding: 8px 16px;
 }
 
 .settings-panel {
     position: absolute;
-    top: 60px;
-    right: 20px;
-    width: 250px;
+    top: 75px;
+    right: 25px; /* Aligned to the right */
+    width: 280px;
     z-index: 1500;
     background: rgba(0,0,0,0.95);
-    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-    border: 1px solid var(--accent);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    border: 2px solid var(--accent) !important;
+    border-radius: 8px;
+    padding: 20px;
 }
 
 .setting-item {
@@ -790,16 +817,53 @@ body.fade-out {
     cursor: pointer;
 }
 
-/* Apply dynamic variables to existing classes */
-.header h1 { color: var(--accent-bright); }
-.custom-file-upload { border-color: var(--accent); color: var(--accent); }
-.custom-file-upload:hover { background: var(--accent); }
-.divider { background: var(--accent); }
-.divider:hover { background: var(--accent-bright); }
-.sheet { border-color: var(--accent); color: var(--accent); }
-.panel { border-color: var(--accent); }
-.results-panel th { color: var(--accent); }
-.history-index { color: var(--accent-bright); }
-.history-query { color: var(--accent); }
-.rename-input { color: var(--accent-bright); border-color: var(--accent); }
+/* 🔥 RESTORED PREMIUM BORDERS (THE LEFT IMAGE STYLE) */
+.panel {
+    background: black;
+    border: 2px solid var(--accent) !important;
+    padding: 15px;
+    min-height: 200px;
+}
+
+.sidebar {
+    border-right: 2px solid var(--accent) !important;
+}
+
+.editor-container {
+    border: 2px solid var(--accent) !important;
+}
+
+.action-btn {
+    border: 1px solid var(--accent) !important;
+    background: rgba(0, 230, 118, 0.1);
+}
+
+.action-btn:hover {
+    background: var(--accent) !important;
+    color: var(--text-dark) !important;
+}
+
+.results-panel {
+    border: 2px solid var(--accent) !important;
+}
+
+.sheet {
+    border: 2px solid var(--accent) !important;
+}
+
+.divider {
+    background: var(--accent) !important;
+}
+
+#menuToggle {
+    color: var(--accent) !important;
+}
+
+.tab-btn.active {
+    color: var(--accent) !important;
+    border-bottom: 3px solid var(--accent) !important;
+}
+
+.history-index { color: var(--accent-bright) !important; }
+.history-query { color: var(--accent) !important; }
 

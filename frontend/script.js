@@ -558,12 +558,12 @@ window.showERDiagram = async () => {
     const modal = document.getElementById("erModal");
     const container = document.getElementById("erDiagramContainer");
     modal.classList.remove("hidden");
-    container.innerHTML = "<h3 style='color:black;'>Generating ER Diagram...</h3>";
+        container.innerHTML = "<h3 style='color:var(--accent);'>Generating ER Diagram...</h3>";
     
     try {
         const tables = await window.duckDB.listTables();
         if(tables.length === 0) {
-            container.innerHTML = "<p style='color:black;'>No tables loaded to generate diagram.</p>";
+            container.innerHTML = "<p style='color:#888;'>No tables loaded to generate diagram.</p>";
             return;
         }
         
@@ -687,14 +687,31 @@ function renderChart() {
         window.myChart.destroy();
     }
 
-    // Heuristic: labels from 1st col, values from 1st numeric col
+    // Improved Heuristic: labels from 1st col, values from 1st numeric (or numeric-looking) col
     let labels = data.rows.map(r => r[0]);
-    let valueColIndex = data.rows[0].findIndex((val, idx) => idx > 0 && typeof val === 'number');
     
-    // Fallback if no numbers found in subsequent cols
+    // Find column that contains numbers (check first 5 rows to be sure)
+    let valueColIndex = -1;
+    for (let i = 1; i < data.columns.length; i++) {
+        const isNumeric = data.rows.slice(0, 5).some(r => {
+            const val = r[i];
+            return typeof val === 'number' || (!isNaN(parseFloat(val)) && isFinite(val));
+        });
+        if (isNumeric) {
+            valueColIndex = i;
+            break;
+        }
+    }
+    
+    // Fallback
     if (valueColIndex === -1) valueColIndex = 1;
 
-    let values = data.rows.map(r => r[valueColIndex]);
+    let values = data.rows.map(r => {
+        const raw = r[valueColIndex];
+        const parsed = parseFloat(raw);
+        return isNaN(parsed) ? 0 : parsed;
+    });
+
     let label = data.columns[valueColIndex];
     const chartType = document.getElementById("chartType").value || "bar";
 

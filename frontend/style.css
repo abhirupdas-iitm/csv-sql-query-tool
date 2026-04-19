@@ -729,8 +729,9 @@ body.fade-out {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #f8f9fa; 
-    border-radius: 4px;
+    background: #0a0a0a; 
+    border-radius: 8px;
+    border: 1px solid #333;
     overflow: hidden; /* Changed to hidden for custom pan logic */
     cursor: grab;
     position: relative;

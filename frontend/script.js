@@ -679,21 +679,21 @@ window.toggleChartView = () => {
 };
 
 function renderChart() {
-    if(!window.lastQueryResult) return;
+    if (!window.lastQueryResult) return;
     const data = window.lastQueryResult;
-    const ctx = document.getElementById('resultChart').getContext('2d');
-
-    if (window.myChart) {
-        window.myChart.destroy();
-    }
-
-    // Improved Heuristic: labels from 1st col, values from 1st numeric (or numeric-looking) col
-    let labels = data.rows.map(r => r[0]);
+    const container = document.getElementById('resultChartContainer');
     
-    // Find column that contains numbers (check first 5 rows to be sure)
+    // Clear the container and re-inject a fresh canvas to prevent Chart.js state collision
+    container.innerHTML = '<canvas id="resultChart"></canvas>';
+    const canvas = document.getElementById('resultChart');
+    const ctx = canvas.getContext('2d');
+
+    const chartType = document.getElementById("chartType").value || "bar";
+
+    // 1. IMPROVED DATA HEURISTIC
     let valueColIndex = -1;
     for (let i = 1; i < data.columns.length; i++) {
-        const isNumeric = data.rows.slice(0, 5).some(r => {
+        const isNumeric = data.rows.slice(0, 10).some(r => {
             const val = r[i];
             return typeof val === 'number' || (!isNaN(parseFloat(val)) && isFinite(val));
         });
@@ -702,23 +702,38 @@ function renderChart() {
             break;
         }
     }
-    
-    // Fallback
     if (valueColIndex === -1) valueColIndex = 1;
 
-    let values = data.rows.map(r => {
-        const raw = r[valueColIndex];
-        const parsed = parseFloat(raw);
-        return isNaN(parsed) ? 0 : parsed;
-    });
+    let chartData = data.rows.map(r => ({
+        label: String(r[0]),
+        value: parseFloat(r[valueColIndex]) || 0
+    }));
 
-    let label = data.columns[valueColIndex];
-    const chartType = document.getElementById("chartType").value || "bar";
+    // 2. DATA CAPPING (Pie/Radar with 1000 items is a crash risk/unreadable)
+    if (chartType === 'pie' || chartType === 'radar') {
+        if (chartData.length > 25) {
+            logMessage(`⚠️ Capping chart to top 25 results for ${chartType}...`, "info");
+            chartData = chartData.sort((a,b) => b.value - a.value).slice(0, 25);
+        }
+    }
 
-    const commonOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: chartType === 'pie' || chartType === 'radar' ? {} : {
+    const labels = chartData.map(d => d.label);
+    const values = chartData.map(d => d.value);
+    const label = data.columns[valueColIndex];
+
+    // 3. SCALE CONFIGURATION
+    let scales = {};
+    if (chartType === 'radar') {
+        scales = {
+            r: {
+                angleLines: { color: 'rgba(255, 255, 255, 0.2)' },
+                grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                pointLabels: { color: '#fff' },
+                ticks: { backdropColor: 'transparent', color: '#fff' }
+            }
+        };
+    } else if (chartType !== 'pie') {
+        scales = {
             y: {
                 beginAtZero: true,
                 grid: { color: 'rgba(255, 255, 255, 0.1)' },
@@ -728,28 +743,44 @@ function renderChart() {
                 grid: { color: 'rgba(255, 255, 255, 0.1)' },
                 ticks: { color: '#fff' }
             }
-        },
-        plugins: {
-            legend: { labels: { color: '#fff' }, position: chartType === 'pie' ? 'right' : 'top' }
-        }
-    };
+        };
+    }
 
-    window.myChart = new Chart(ctx, {
-        type: chartType,
-        data: {
-            labels: labels,
-            datasets: [{
-                label: label,
-                data: values,
-                backgroundColor: chartType === 'pie' ? 
-                    labels.map((_, i) => `hsla(${(i * 360) / labels.length}, 70%, 50%, 0.6)`) : 
-                    'rgba(0, 230, 118, 0.6)',
-                borderColor: '#00e676',
-                borderWidth: 1
-            }]
-        },
-        options: commonOptions
-    });
+    try {
+        if (window.myChart) window.myChart.destroy();
+
+        window.myChart = new Chart(ctx, {
+            type: chartType,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: label,
+                    data: values,
+                    backgroundColor: chartType === 'pie' ? 
+                        labels.map((_, i) => `hsla(${(i * 360) / labels.length}, 70%, 50%, 0.6)`) : 
+                        'rgba(0, 230, 118, 0.3)',
+                    borderColor: '#00e676',
+                    borderWidth: 2,
+                    fill: chartType === 'radar' || chartType === 'line'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: scales,
+                plugins: {
+                    legend: {
+                        display: chartType !== 'bar',
+                        labels: { color: '#fff' },
+                        position: chartType === 'pie' ? 'right' : 'top'
+                    }
+                }
+            }
+        });
+    } catch(err) {
+        console.error("Rendering Error:", err);
+        logMessage(`❌ Chart rendering error: ${err.message}`, "error");
+    }
 }
 
 // 🔥 ER DIAGRAM ZOOM & PAN LOGIC

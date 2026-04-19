@@ -235,7 +235,8 @@ function displayTables(tables) {
             nameSpan.innerText = `└ ${t}`;
             nameSpan.style.cursor = "pointer";
             nameSpan.onclick = () => {
-                document.getElementById("query").value = `SELECT * FROM "${t}";`;
+                document.getElementById("query").value = `SELECT * FROM ${t};`;
+                if(window.syncEditor) window.syncEditor();
             };
             
             const actionsDiv = document.createElement("div");
@@ -291,14 +292,19 @@ async function runQuery() {
     if (!sql) return;
 
     let runSql = sql;
-    // Auto-quote unquoted table names to prevent parse errors from hyphens without requiring the user to type quotes.
-    if (window.tableToFileMap) {
-        Object.keys(window.tableToFileMap).forEach(tableName => {
-            if (tableName.includes("-")) {
-                runSql = runSql.split(tableName).join(`"${tableName}"`);
-            }
+    
+    // 🔥 AUTO-QUOTE SYSTEM
+    // Transparently wrap known table names in quotes so the user doesn't have to
+    try {
+        const tables = await window.duckDB.listTables();
+        tables.forEach(tableName => {
+            // Use regex to find the table name as a whole word, 
+            // but only if it's NOT already preceded by a double quote.
+            const regex = new RegExp(`(?<!")\\b${tableName.replace(/-/g, '\\-')}\\b(?!")`, 'g');
+            runSql = runSql.replace(regex, `"${tableName}"`);
         });
-        runSql = runSql.replace(/""/g, '"'); // Cleanup in case they already quoted it
+    } catch (e) {
+        console.error("Auto-quote failed:", e);
     }
 
     logMessage("⚡ Running query...", "info");

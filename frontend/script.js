@@ -709,12 +709,9 @@ function renderChart() {
         value: parseFloat(r[valueColIndex]) || 0
     }));
 
-    // 2. DATA CAPPING (Pie/Radar with 1000 items is a crash risk/unreadable)
+    // 2. SORT DATA for pie/radar (descending by value for readability)
     if (chartType === 'pie' || chartType === 'radar') {
-        if (chartData.length > 25) {
-            logMessage(`⚠️ Capping chart to top 25 results for ${chartType}...`, "info");
-            chartData = chartData.sort((a,b) => b.value - a.value).slice(0, 25);
-        }
+        chartData = chartData.sort((a, b) => b.value - a.value);
     }
 
     const labels = chartData.map(d => d.label);

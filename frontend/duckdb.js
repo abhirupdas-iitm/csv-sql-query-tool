@@ -107,6 +107,63 @@ async function loadCSVFile(file) {
     return tableName;
 }
 
+// 🔥 SQL SCRIPT EXECUTION — runs parsed PostgreSQL dump statements in DuckDB
+async function loadSQLScript(file, logCallback) {
+    if (!db) throw new Error("DuckDB not initialized. Network might have blocked it.");
+
+    const log = logCallback || console.log;
+    const scriptText = await file.text();
+
+    log(`📜 Parsing SQL script (${(scriptText.length / 1024).toFixed(1)} KB)...`, "info");
+
+    // Use the parser to convert PostgreSQL dump → DuckDB statements
+    const { statements, summary } = window.parsePgDump(scriptText);
+
+    log(`📋 Parsed: ${summary.tables} tables, ${summary.inserts} data rows, ${summary.constraints} constraints (${summary.skipped} skipped)`, "info");
+
+    if (statements.length === 0) {
+        throw new Error("No executable statements found in the SQL script.");
+    }
+
+    const createdTables = [];
+    let executed = 0;
+    let errors = 0;
+
+    for (const stmt of statements) {
+        try {
+            await conn.query(stmt.sql);
+            executed++;
+
+            if (stmt.type === 'CREATE_TABLE') {
+                const tableNameMatch = stmt.description.match(/Create table:\s*(.+)/);
+                const tName = tableNameMatch ? tableNameMatch[1] : 'unknown';
+                createdTables.push(tName);
+                log(`✅ ${stmt.description}`, "success");
+
+                // Track file association
+                window.tableToFileMap = window.tableToFileMap || {};
+                const cleanFileName = file.name.replace(/\.[^.]+$/, "");
+                window.tableToFileMap[tName] = cleanFileName;
+            } else if (stmt.type === 'INSERT') {
+                // Log insert progress less verbosely
+                if (executed % 5 === 0 || stmt === statements[statements.length - 1]) {
+                    log(`📥 ${stmt.description} (${executed}/${statements.length} statements)`, "info");
+                }
+            } else if (stmt.type === 'CONSTRAINT') {
+                log(`🔗 ${stmt.description}`, "success");
+            }
+        } catch (err) {
+            errors++;
+            console.warn(`⚠️ Statement failed: ${stmt.description}`, err.message);
+            log(`⚠️ Skipped: ${stmt.description} — ${err.message}`, "info");
+        }
+    }
+
+    log(`🎉 Script complete! ${executed} statements executed, ${errors} skipped.`, "success");
+
+    return createdTables.join(", ") || "No tables created";
+}
+
 async function queryDB(sql) {
     if (!conn) throw new Error("DuckDB not initialized.");
 
@@ -131,7 +188,7 @@ async function listTables() {
 }
 
 // 🔹 Export locally to window globally for the rest of the application
-window.duckDB = { initDB, loadCSVFile, queryDB, listTables };
+window.duckDB = { initDB, loadCSVFile, loadSQLScript, queryDB, listTables };
 
 // Signal to script.js that the duckDB APIs are loaded and ready
 _resolveReady(window.duckDB);

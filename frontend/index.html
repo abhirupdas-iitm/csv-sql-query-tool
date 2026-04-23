@@ -82,7 +82,7 @@
                     <button id="viewERDiagramBtn" class="custom-file-upload hidden" onclick="showERDiagram()">
                         View ER Diagram
                     </button>
-                    <input type="file" id="fileInput" hidden>
+                    <input type="file" id="fileInput" accept=".csv,.xlsx,.xls,.sql" hidden>
                     <span id="fileName">No file chosen</span>
                 </div>
 
@@ -167,7 +167,8 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
-        <script src="duckdb.js?v=11"></script>
+        <script src="sql-script-parser.js?v=1"></script>
+        <script src="duckdb.js?v=12"></script>
         <script src="script.js?v=14"></script>
         <script type="module" src="auth.js?v=11"></script>
 

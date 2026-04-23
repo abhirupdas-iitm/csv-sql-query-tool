@@ -120,6 +120,8 @@ async function uploadCSV() {
     const user = getCurrentUser();
     if (!user) return;
 
+    const ext = file.name.split('.').pop().toLowerCase();
+
     logMessage("⬆ Loading file into DuckDB...", "info");
 
     try {
@@ -131,8 +133,15 @@ async function uploadCSV() {
         // Initialise DuckDB engine (no-op if already done)
         await window.duckDB.initDB();
 
-        // Load CSV into DuckDB — returns the table name
-        const tableName = await window.duckDB.loadCSVFile(file);
+        let tableName;
+
+        // 🔥 ROUTE: SQL scripts go through the script parser
+        if (ext === 'sql') {
+            tableName = await window.duckDB.loadSQLScript(file, logMessage);
+        } else {
+            // CSV / Excel files go through the existing loader
+            tableName = await window.duckDB.loadCSVFile(file);
+        }
 
         logMessage(`✅ Loaded as table: ${tableName}`, "success");
         document.getElementById("viewERDiagramBtn").classList.remove("hidden");

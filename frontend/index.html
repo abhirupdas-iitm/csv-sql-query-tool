@@ -105,16 +105,18 @@
                             <div class="panel query-panel" id="queryPanel">
                                 <div class="query-header">
                                     <h3>SQL Query</h3>
-                                    <div class="snippet-actions">
-                                        <input type="text" id="snippetName" placeholder="Name this snippet...">
-                                        <button onclick="saveSnippet()" title="Save as Snippet">💾 Save</button>
-                                    </div>
                                 </div>
                                 <div class="editor-container">
                                     <pre id="editorOverlay" aria-hidden="true"><code class="language-sql"></code></pre>
                                     <textarea id="query" spellcheck="false" oninput="syncEditor()"></textarea>
                                 </div>
-                                <button onclick="runQuery()">Run</button>
+                                <div class="query-actions">
+                                    <div class="snippet-actions">
+                                        <input type="text" id="snippetName" placeholder="Snippet name...">
+                                        <button onclick="saveSnippet()" title="Save as Snippet">💾 Save</button>
+                                    </div>
+                                    <button class="run-btn" onclick="runQuery()">Run</button>
+                                </div>
                             </div>
 
                         </div>

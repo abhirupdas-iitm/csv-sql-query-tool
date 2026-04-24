@@ -352,6 +352,13 @@ async function runQuery() {
             document.getElementById("resultChartContainer").classList.add("hidden");
             document.getElementById("resultTableContainer").classList.remove("hidden");
             document.getElementById("toggleChartBtn").innerText = "📊 Visualise";
+            const zoomControls = document.getElementById("chartZoomControls");
+            if (zoomControls) zoomControls.classList.add("hidden");
+            // Reset sliders and container size
+            document.getElementById("chartZoomX").value = 1;
+            document.getElementById("chartZoomY").value = 1;
+            document.getElementById("resultChartContainer").style.minWidth = "100%";
+            document.getElementById("resultChartContainer").style.height = "500px";
         }
 
         // Save query then reload history after Firestore has time to persist
@@ -674,16 +681,30 @@ window.toggleChartView = () => {
     const tableDiv = document.getElementById("resultTableContainer");
     const chartDiv = document.getElementById("resultChartContainer");
     const btn = document.getElementById("toggleChartBtn");
+    const zoomControls = document.getElementById("chartZoomControls");
 
     if (chartDiv.classList.contains("hidden")) {
         tableDiv.classList.add("hidden");
         chartDiv.classList.remove("hidden");
+        if (zoomControls) zoomControls.classList.remove("hidden");
         btn.innerText = "🔙 Show Table";
         renderChart();
     } else {
         tableDiv.classList.remove("hidden");
         chartDiv.classList.add("hidden");
+        if (zoomControls) zoomControls.classList.add("hidden");
         btn.innerText = "📊 Visualise";
+    }
+};
+
+window.updateChartZoom = () => {
+    const zoomX = document.getElementById('chartZoomX').value;
+    const zoomY = document.getElementById('chartZoomY').value;
+    const container = document.getElementById('resultChartContainer');
+    
+    if (container) {
+        container.style.minWidth = `${zoomX * 100}%`;
+        container.style.height = `${zoomY * 500}px`;
     }
 };
 

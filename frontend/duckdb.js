@@ -169,9 +169,52 @@ async function queryDB(sql) {
 
     const result = await conn.query(sql);
     const cols = result.schema.fields.map(f => f.name);
+    const types = result.schema.fields.map(f => {
+        if (f.type && f.type.toString) return f.type.toString().toLowerCase();
+        return '';
+    });
+
     const rows = result.toArray().map(row =>
-        cols.map(col => {
-            const v = row[col];
+        cols.map((col, i) => {
+            let v = row[col];
+            const typeStr = types[i];
+
+            if (v === null || v === undefined) return v;
+
+            // Properly format Arrow Date and Timestamp outputs
+            if (typeStr.includes('date') || typeStr.includes('timestamp')) {
+                let ms = 0;
+                if (typeof v === 'bigint' || typeof v === 'number') {
+                    const num = Number(v);
+                    // Arrow Date<Day> is sometimes returned as days since epoch (tiny number)
+                    if (typeStr === 'date<day>' && num < 10000000) {
+                        ms = num * 24 * 60 * 60 * 1000;
+                    } else {
+                        // Usually returned as milliseconds (e.g. TimestampMillisecond)
+                        ms = num;
+                    }
+                } else if (v instanceof Date) {
+                    ms = v.getTime();
+                } else {
+                    return v; // Not a recognized format, return as is
+                }
+
+                const d = new Date(ms);
+                const pad = (n) => n.toString().padStart(2, '0');
+                const yyyy = d.getUTCFullYear();
+                const mm = pad(d.getUTCMonth() + 1);
+                const dd = pad(d.getUTCDate());
+                
+                if (typeStr.includes('timestamp')) {
+                    const hh = pad(d.getUTCHours());
+                    const min = pad(d.getUTCMinutes());
+                    const ss = pad(d.getUTCSeconds());
+                    return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+                } else {
+                    return `${yyyy}-${mm}-${dd}`;
+                }
+            }
+
             return typeof v === 'bigint' ? Number(v) : v;
         })
     );

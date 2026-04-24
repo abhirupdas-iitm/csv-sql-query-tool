@@ -800,8 +800,8 @@ function initERInteractions() {
     // Zoom via Wheel
     container.addEventListener("wheel", (e) => {
         e.preventDefault();
-        const delta = e.deltaY > 0 ? -0.1 : 0.1;
-        zoomScale = Math.min(Math.max(0.1, zoomScale + delta), 3);
+        const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+        zoomScale = Math.min(Math.max(0.05, zoomScale * zoomFactor), 20);
         applyERTransform();
     });
 
@@ -833,16 +833,17 @@ function initERInteractions() {
         const controls = document.createElement("div");
         controls.className = "zoom-controls";
         controls.innerHTML = `
-            <div class="zoom-btn" onclick="adjustZoom(0.1)">+</div>
-            <div class="zoom-btn" onclick="adjustZoom(-0.1)">-</div>
+            <div class="zoom-btn" onclick="adjustZoom(1)">+</div>
+            <div class="zoom-btn" onclick="adjustZoom(-1)">-</div>
             <div class="zoom-btn" onclick="resetZoom()">↺</div>
         `;
         container.parentElement.appendChild(controls);
     }
 }
 
-window.adjustZoom = (delta) => {
-    zoomScale = Math.min(Math.max(0.1, zoomScale + delta), 3);
+window.adjustZoom = (direction) => {
+    const zoomFactor = direction > 0 ? 1.2 : 0.8;
+    zoomScale = Math.min(Math.max(0.05, zoomScale * zoomFactor), 20);
     applyERTransform();
 };
 

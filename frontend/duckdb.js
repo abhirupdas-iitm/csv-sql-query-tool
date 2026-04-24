@@ -114,12 +114,12 @@ async function loadSQLScript(file, logCallback) {
     const log = logCallback || console.log;
     const scriptText = await file.text();
 
-    log(`📜 Parsing SQL script (${(scriptText.length / 1024).toFixed(1)} KB)...`, "info");
+    log(`≡ Parsing SQL script (${(scriptText.length / 1024).toFixed(1)} KB)...`, "info");
 
     // Use the parser to convert PostgreSQL dump → DuckDB statements
     const { statements, summary } = window.parsePgDump(scriptText);
 
-    log(`📋 Parsed: ${summary.tables} tables, ${summary.inserts} data rows, ${summary.constraints} constraints (${summary.skipped} skipped)`, "info");
+    log(`≡ Parsed: ${summary.tables} tables, ${summary.inserts} data rows, ${summary.constraints} constraints (${summary.skipped} skipped)`, "info");
 
     if (statements.length === 0) {
         throw new Error("No executable statements found in the SQL script.");
@@ -138,7 +138,7 @@ async function loadSQLScript(file, logCallback) {
                 const tableNameMatch = stmt.description.match(/Create table:\s*(.+)/);
                 const tName = tableNameMatch ? tableNameMatch[1] : 'unknown';
                 createdTables.push(tName);
-                log(`✅ ${stmt.description}`, "success");
+                log(`✓ ${stmt.description}`, "success");
 
                 // Track file association
                 window.tableToFileMap = window.tableToFileMap || {};
@@ -147,19 +147,19 @@ async function loadSQLScript(file, logCallback) {
             } else if (stmt.type === 'INSERT') {
                 // Log insert progress less verbosely
                 if (executed % 5 === 0 || stmt === statements[statements.length - 1]) {
-                    log(`📥 ${stmt.description} (${executed}/${statements.length} statements)`, "info");
+                    log(`↳ ${stmt.description} (${executed}/${statements.length} statements)`, "info");
                 }
             } else if (stmt.type === 'CONSTRAINT') {
-                log(`🔗 ${stmt.description}`, "success");
+                log(`# ${stmt.description}`, "success");
             }
         } catch (err) {
             errors++;
-            console.warn(`⚠️ Statement failed: ${stmt.description}`, err.message);
-            log(`⚠️ Skipped: ${stmt.description} — ${err.message}`, "info");
+            console.warn(`! Statement failed: ${stmt.description}`, err.message);
+            log(`! Skipped: ${stmt.description} — ${err.message}`, "info");
         }
     }
 
-    log(`🎉 Script complete! ${executed} statements executed, ${errors} skipped.`, "success");
+    log(`✓✓ Script complete! ${executed} statements executed, ${errors} skipped.`, "success");
 
     return createdTables.join(", ") || "No tables created";
 }

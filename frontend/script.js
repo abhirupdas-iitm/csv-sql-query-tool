@@ -122,7 +122,7 @@ async function uploadCSV() {
 
     const ext = file.name.split('.').pop().toLowerCase();
 
-    logMessage("⬆ Loading file into DuckDB...", "info");
+    logMessage("▶ Loading file into DuckDB...", "info");
 
     try {
         showLoader();
@@ -143,13 +143,13 @@ async function uploadCSV() {
             tableName = await window.duckDB.loadCSVFile(file);
         }
 
-        logMessage(`✅ Loaded as table: ${tableName}`, "success");
+        logMessage(`✓ Loaded as table: ${tableName}`, "success");
         document.getElementById("viewERDiagramBtn").classList.remove("hidden");
         await loadTables();
 
     } catch (err) {
         console.error(err);
-        logMessage("❌ Upload failed: " + err.message, "error");
+        logMessage("! Upload failed: " + err.message, "error");
     } finally {
         hideLoader();
     }
@@ -162,7 +162,7 @@ async function loadTables() {
         displayTables(tables);
     } catch (err) {
         console.error("loadTables error:", err);
-        logMessage("❌ Could not list tables: " + err.message, "error");
+        logMessage("! Could not list tables: " + err.message, "error");
     }
 }
 
@@ -316,7 +316,7 @@ async function runQuery() {
         console.error("Auto-quote failed:", e);
     }
 
-    logMessage("⚡ Running query...", "info");
+    logMessage("> Running query...", "info");
 
     try {
         const startTime = performance.now();
@@ -325,7 +325,7 @@ async function runQuery() {
 
         window.lastQueryResult = data;
 
-        logMessage(`✅ Query executed in ${duration}ms`, "success");
+        logMessage(`✓ Query executed in ${duration}ms`, "success");
         
         // Update metadata and show actions
         const meta = document.getElementById("queryMetadata");
@@ -369,7 +369,7 @@ async function runQuery() {
 
     } catch (err) {
         console.error(err);
-        logMessage("❌ Query error: " + err.message, "error");
+        logMessage("! Query error: " + err.message, "error");
         document.getElementById("downloadResultBtn").classList.add("hidden");
         document.getElementById("toggleChartBtn").classList.add("hidden");
         if(document.getElementById("queryMetadata")) document.getElementById("queryMetadata").innerText = "";
@@ -479,7 +479,7 @@ window.renameTableFunc = (oldName, nameSpan, dbName) => {
             try {
                 showLoader();
                 await window.duckDB.queryDB(`ALTER TABLE "${oldName}" RENAME TO "${newName}"`);
-                logMessage(`✅ Renamed table ${oldName} to ${newName}`, "success");
+                logMessage(`✓ Renamed table ${oldName} to ${newName}`, "success");
                 // Update tableToFileMap
                 if(window.tableToFileMap && window.tableToFileMap[oldName]) {
                     window.tableToFileMap[newName] = window.tableToFileMap[oldName];
@@ -489,7 +489,7 @@ window.renameTableFunc = (oldName, nameSpan, dbName) => {
                 }
                 await loadTables();
             } catch(e) {
-                logMessage(`❌ Failed to rename table: ${e.message}`, "error");
+                logMessage(`! Failed to rename table: ${e.message}`, "error");
                 nameSpan.innerHTML = `└ ${oldName}`;
             } finally {
                 hideLoader();
@@ -542,9 +542,9 @@ window.renameDatabaseFunc = (oldName, nameSpan) => {
 
 window.downloadTableFunc = async (tableName) => {
     try {
-        logMessage(`📥 Downloading table ${tableName}...`, "info");
+        logMessage(`↓ Downloading table ${tableName}...`, "info");
         const data = await window.duckDB.queryDB(`SELECT * FROM "${tableName}"`);
-        if(!data || !data.rows || data.rows.length === 0) return logMessage("❌ Table is empty", "error");
+        if(!data || !data.rows || data.rows.length === 0) return logMessage("! Table is empty", "error");
         
         let csvContent = "data:text/csv;charset=utf-8,";
         csvContent += data.columns.join(",") + "\r\n";
@@ -564,9 +564,9 @@ window.downloadTableFunc = async (tableName) => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        logMessage(`✅ Downloaded ${tableName}`, "success");
+        logMessage(`✓ Downloaded ${tableName}`, "success");
     } catch(err) {
-        logMessage(`❌ Failed to download table: ${err.message}`, "error");
+        logMessage(`! Failed to download table: ${err.message}`, "error");
     }
 };
 
@@ -641,7 +641,7 @@ window.showERDiagram = async () => {
         }
     } catch(err) {
         console.error(err);
-        logMessage(`❌ Failed to generate ER diagram: ${err.message}`, "error");
+        logMessage(`! Failed to generate ER diagram: ${err.message}`, "error");
         container.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
     }
 };
@@ -674,7 +674,7 @@ window.downloadCurrentResult = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    logMessage("✅ Exported results to CSV", "success");
+    logMessage("✓ Exported results to CSV", "success");
 };
 
 window.toggleChartView = () => {
@@ -806,14 +806,16 @@ function renderChart() {
         });
     } catch(err) {
         console.error("Rendering Error:", err);
-        logMessage(`❌ Chart rendering error: ${err.message}`, "error");
+        logMessage(`! Chart rendering error: ${err.message}`, "error");
     }
 }
 
 // 🔥 ER DIAGRAM ZOOM & PAN LOGIC
 let zoomScale = 1;
+let translateX = 0;
+let translateY = 0;
 let isPanning = false;
-let startX, startY, scrollLeft, scrollTop;
+let startX, startY;
 
 function initERInteractions() {
     const container = document.getElementById("erDiagramContainer");
@@ -829,24 +831,27 @@ function initERInteractions() {
     // Pan via Mouse
     container.addEventListener("mousedown", (e) => {
         isPanning = true;
-        startX = e.pageX - container.offsetLeft;
-        startY = e.pageY - container.offsetTop;
-        scrollLeft = container.scrollLeft;
-        scrollTop = container.scrollTop;
+        startX = e.pageX - translateX;
+        startY = e.pageY - translateY;
+        container.style.cursor = "grabbing";
     });
 
-    container.addEventListener("mouseleave", () => { isPanning = false; });
-    container.addEventListener("mouseup", () => { isPanning = false; });
+    container.addEventListener("mouseleave", () => { 
+        isPanning = false; 
+        container.style.cursor = "grab";
+    });
+    
+    container.addEventListener("mouseup", () => { 
+        isPanning = false; 
+        container.style.cursor = "grab";
+    });
 
     container.addEventListener("mousemove", (e) => {
         if (!isPanning) return;
         e.preventDefault();
-        const x = e.pageX - container.offsetLeft;
-        const y = e.pageY - container.offsetTop;
-        const walkX = (x - startX) * 2;
-        const walkY = (y - startY) * 2;
-        container.scrollLeft = scrollLeft - walkX;
-        container.scrollTop = scrollTop - walkY;
+        translateX = e.pageX - startX;
+        translateY = e.pageY - startY;
+        applyERTransform();
     });
 
     // Zoom Controls
@@ -870,16 +875,15 @@ window.adjustZoom = (direction) => {
 
 window.resetZoom = () => {
     zoomScale = 1;
+    translateX = 0;
+    translateY = 0;
     applyERTransform();
-    const container = document.getElementById("erDiagramContainer");
-    container.scrollLeft = 0;
-    container.scrollTop = 0;
 };
 
 function applyERTransform() {
     const mermaidEl = document.querySelector("#erDiagramContainer .mermaid");
     if(mermaidEl) {
-        mermaidEl.style.transform = `scale(${zoomScale})`;
+        mermaidEl.style.transform = `translate(${translateX}px, ${translateY}px) scale(${zoomScale})`;
     }
 }
 
@@ -938,16 +942,16 @@ window.saveSnippet = async () => {
     const name = nameInput.value.trim();
     const queryText = document.getElementById("query").value.trim();
     
-    if (!name || !queryText) return logMessage("❌ Name and query are required!", "error");
+    if (!name || !queryText) return logMessage("! Name and query are required!", "error");
     
     try {
         showLoader();
         await window.saveSnippet(name, queryText);
-        logMessage(`✅ Saved snippet: ${name}`, "success");
+        logMessage(`✓ Saved snippet: ${name}`, "success");
         nameInput.value = "";
         window.loadSnippets();
     } catch (err) {
-        logMessage(`❌ Failed to save snippet: ${err.message}`, "error");
+        logMessage(`! Failed to save snippet: ${err.message}`, "error");
     } finally {
         hideLoader();
     }

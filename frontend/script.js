@@ -68,6 +68,11 @@ window.addEventListener("DOMContentLoaded", () => {
     // 🔥 INITIAL SYNC
     window.syncEditor();
     
+    // 🔥 INIT AUTOCOMPLETE
+    if (window.SQLAutocomplete) {
+        window.sqlAutocomplete = new window.SQLAutocomplete('query');
+    }
+    
     // 🔥 LOAD THEME
     const savedTheme = localStorage.getItem("sheetql_theme");
     if(savedTheme) window.updateThemeColor(savedTheme);
@@ -168,6 +173,9 @@ async function loadTables() {
 
 // 🔥 DISPLAY TABLES
 function displayTables(tables) {
+    if (window.sqlAutocomplete) {
+        window.sqlAutocomplete.setTables(tables);
+    }
     const container = document.getElementById("tables");
     container.innerHTML = "";
 

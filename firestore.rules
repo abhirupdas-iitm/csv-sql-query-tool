@@ -1,0 +1,23 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /queries/{docId} {
+      allow create: if request.auth != null && request.resource.data.user_id == request.auth.uid;
+      allow read, update, delete: if request.auth != null && resource.data.user_id == request.auth.uid;
+    }
+    
+    match /snippets/{docId} {
+      allow create: if request.auth != null && request.resource.data.user_id == request.auth.uid;
+      allow read, update, delete: if request.auth != null && resource.data.user_id == request.auth.uid;
+    }
+
+    match /anonymous/{anonId}/queries/{docId} {
+      allow read, write: if true;
+    }
+
+    match /anonymous/{anonId}/snippets/{docId} {
+      allow read, write: if true;
+    }
+  }
+}
